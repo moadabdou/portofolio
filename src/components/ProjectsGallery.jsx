@@ -1,7 +1,8 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useTexture, Text, shaderMaterial, useScroll } from '@react-three/drei';
 import { useFrame, extend } from '@react-three/fiber';
 import * as THREE from 'three';
+import { galleryState } from '../App';
 
 const GlitchMaterial = shaderMaterial(
   {
@@ -124,38 +125,38 @@ const GlitchFrameMaterial = shaderMaterial(
 extend({ GlitchMaterial, GlitchFrameMaterial });
 
 export const PROJECTS = [
-  { 
-    id: 1, 
-    img: '/projects/p1.png', 
-    title: 'AERO SPEECH', 
+  {
+    id: 1,
+    img: '/projects/p1.png',
+    title: 'AERO SPEECH',
     description: 'A cutting-edge hybrid Text-to-Speech engine engineered for ultra-low latency and natural prosody. Built with a distributed backend architecture to handle high-concurrency real-time audio synthesis at scale.',
     github: 'https://github.com/moadabdou/aerospeech'
   },
-  { 
-    id: 2, 
-    img: '/projects/p2.png', 
-    title: 'NEURAL NEXUS', 
+  {
+    id: 2,
+    img: '/projects/p2.png',
+    title: 'NEURAL NEXUS',
     description: 'Advanced deep learning orchestration platform that simplifies the deployment of complex neural networks. Features automated hyperparameter tuning and seamless scaling across multi-GPU environments.',
     github: 'https://github.com/moadabdou/neural-nexus'
   },
-  { 
-    id: 3, 
-    img: '/projects/p3.png', 
-    title: 'CYBER CORE', 
+  {
+    id: 3,
+    img: '/projects/p3.png',
+    title: 'CYBER CORE',
     description: 'Enterprise-grade cybersecurity monitoring system utilizing transformer-based anomaly detection. It provides real-time threat intelligence and automated incident response for critical infrastructure.',
     github: 'https://github.com/moadabdou/cyber-core'
   },
-  { 
-    id: 4, 
-    img: '/projects/p4.png', 
-    title: 'VIRTUAL VORTEX', 
+  {
+    id: 4,
+    img: '/projects/p4.png',
+    title: 'VIRTUAL VORTEX',
     description: 'A high-performance WebGL visualization engine designed for rendering complex fluid dynamics and particle systems in real-time. Leverages custom GLSL shaders for cinematic-quality visual effects.',
     github: 'https://github.com/moadabdou/virtual-vortex'
   },
-  { 
-    id: 5, 
-    img: '/projects/p5.png', 
-    title: 'QUANTUM QUARTZ', 
+  {
+    id: 5,
+    img: '/projects/p5.png',
+    title: 'QUANTUM QUARTZ',
     description: 'High-dimensional data analytics suite specialized in quantum computing simulations. Offers immersive 3D visualizations and predictive modeling for multi-variable experimental datasets.',
     github: 'https://github.com/moadabdou/quantum-quartz'
   },
@@ -174,10 +175,8 @@ function ProjectCard({ url, title, index, total, radius, startAngle, endAngle, x
   if (texture) texture.colorSpace = THREE.SRGBColorSpace;
   if (hudTexture) hudTexture.colorSpace = THREE.SRGBColorSpace;
 
-  // Calculate position along the arc in the YZ plane
-  const progress = total > 1 ? index / (total - 1) : 0;
-  const angle = THREE.MathUtils.lerp(startAngle, endAngle, progress);
-
+  // Calculate position along a full circle
+  const angle = (index / total) * Math.PI * 2 + 90;
 
   const y = Math.sin(angle) * radius;
   const z = Math.cos(angle) * radius;
@@ -302,18 +301,40 @@ export function ProjectsGallery() {
   const rotZ = Math.PI; // Tweak this if the images are sideways or upside down
 
   const [glitchIntensity, setGlitchIntensity] = useState(0);
+  const currentRotation = useRef(0);
 
-  useFrame((state) => {
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Only navigate if we are mostly scrolled to the projects section
+      if (scroll.offset < 0.6) return;
+
+      if (e.key === 'ArrowRight') {
+        galleryState.index = (galleryState.index + 1) % PROJECTS.length;
+        galleryState.targetRotation -= (Math.PI * 2) / PROJECTS.length;
+      } else if (e.key === 'ArrowLeft') {
+        galleryState.index = (galleryState.index - 1 + PROJECTS.length) % PROJECTS.length;
+        galleryState.targetRotation += (Math.PI * 2) / PROJECTS.length;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [scroll]);
+
+  useFrame((state, delta) => {
     if (!galleryRef.current) return;
     const offset = scroll.offset;
     const scaleProgress = THREE.MathUtils.smoothstep(offset, 0.45, 0.8);
-    // Glitch starts slightly before scaling and lasts much longer (until 0.95 scroll)
     const glitchProgress = THREE.MathUtils.smoothstep(offset, 0.4, 0.98);
 
     galleryRef.current.scale.setScalar(THREE.MathUtils.lerp(0.001, 1, scaleProgress));
     galleryRef.current.visible = scaleProgress > 0.01;
 
-    // Use a slower decay (exponent 1.0 instead of 1.5) to keep the glitch visible longer
+    // Smoothly rotate the gallery
+    currentRotation.current = THREE.MathUtils.lerp(currentRotation.current, galleryState.targetRotation, delta * 4);
+    galleryRef.current.rotation.x = currentRotation.current;
+
     const intensity = Math.pow(1.0 - glitchProgress, 1.0);
     setGlitchIntensity(intensity);
   });

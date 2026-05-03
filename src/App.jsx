@@ -12,8 +12,10 @@ import MoadName from './components/MoadName';
 import HeaderFrame from './components/HeaderFrame';
 import { ProjectsGallery } from './components/ProjectsGallery';
 import ProjectDetails from './components/ProjectDetails';
+import KeyboardHint from './components/KeyboardHint';
 
 export const scrollState = { offset: 0 };
+export const galleryState = { index: 0, targetRotation: 0 };
 
 
 // Wrap the custom Effect class into a React component
@@ -123,6 +125,7 @@ export default function App() {
                 <section style={{ height: '100vh', position: 'relative' }}>
                   <ProjectDetails />
                 </section>
+                <KeyboardHint />
               </div>
             </Scroll>
           </ScrollControls>
