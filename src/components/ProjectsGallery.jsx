@@ -270,6 +270,8 @@ export function ProjectsGallery() {
   const galleryRef = useRef();
   const audioCtxRef = useRef(null);
   const audioBufferRef = useRef(null);
+  const glitchBufferRef = useRef(null);
+  const hasPlayedEntrySoundRef = useRef(false);
   const scroll = useScroll();
 
   // Tweakable parameters for the arc in the YZ plane
@@ -294,17 +296,58 @@ export function ProjectsGallery() {
   const [glitchIntensity, setGlitchIntensity] = useState(0);
   const currentRotation = useRef(0);
 
-  // Pre-decode whoosh audio for zero-latency playback
+  // Pre-decode audio for zero-latency playback
   useEffect(() => {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     audioCtxRef.current = ctx;
-    fetch('/audio/alexzavesa-woosh-game-glitch-4-463026.mp3')
-      .then((r) => r.arrayBuffer())
-      .then((ab) => ctx.decodeAudioData(ab))
-      .then((buf) => { audioBufferRef.current = buf; })
-      .catch(() => {});
-    return () => ctx.close();
+
+    const loadSound = (url, bufferRef) => {
+      fetch(url)
+        .then((r) => r.arrayBuffer())
+        .then((ab) => ctx.decodeAudioData(ab))
+        .then((buf) => { bufferRef.current = buf; })
+        .catch(() => { });
+    };
+
+    loadSound('/audio/alexzavesa-woosh-game-glitch-4-463026.mp3', audioBufferRef);
+    loadSound('/audio/virtual_vibes-glitch-sound-effect-hd-379466.mp3', glitchBufferRef);
+
+    // Audio Unlocker: Browsers block audio until a user gesture.
+    const unlock = () => {
+      if (ctx.state === 'suspended') ctx.resume();
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('keydown', unlock);
+      window.removeEventListener('wheel', unlock);
+      window.removeEventListener('touchstart', unlock);
+    };
+    window.addEventListener('click', unlock);
+    window.addEventListener('keydown', unlock);
+    window.addEventListener('wheel', unlock);
+    window.addEventListener('touchstart', unlock);
+
+    return () => {
+      ctx.close();
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('keydown', unlock);
+      window.removeEventListener('wheel', unlock);
+      window.removeEventListener('touchstart', unlock);
+    };
   }, []);
+
+  const playSound = (buffer, volume = 0.5) => {
+    if (audioCtxRef.current && buffer) {
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+      const src = audioCtxRef.current.createBufferSource();
+      src.buffer = buffer;
+      const gain = audioCtxRef.current.createGain();
+      gain.gain.value = volume;
+      src.connect(gain);
+      gain.connect(audioCtxRef.current.destination);
+      src.start(0);
+    }
+  };
 
   // Keyboard navigation
   useEffect(() => {
@@ -323,17 +366,8 @@ export function ProjectsGallery() {
       }
 
       // Play pre-decoded whoosh (no decode delay)
-      if (audioCtxRef.current && audioBufferRef.current) {
-        if (audioCtxRef.current.state === 'suspended') {
-          audioCtxRef.current.resume();
-        }
-        const src = audioCtxRef.current.createBufferSource();
-        src.buffer = audioBufferRef.current;
-        const gain = audioCtxRef.current.createGain();
-        gain.gain.value = 0.5;
-        src.connect(gain);
-        gain.connect(audioCtxRef.current.destination);
-        src.start(0);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        playSound(audioBufferRef.current, 0.3);
       }
     };
 
@@ -352,9 +386,19 @@ export function ProjectsGallery() {
 
     // Smoothly update the current rotation (used for the axis pulse or other local effects)
     currentRotation.current = THREE.MathUtils.lerp(currentRotation.current, galleryState.targetRotation, delta * 4);
-    
+
     const intensity = Math.pow(1.0 - glitchProgress, 1.0);
     setGlitchIntensity(intensity);
+
+    // Trigger glitch sound on entry
+    // Threshold 0.5 is when we are transitioning into the projects section
+    if (offset > 0.5 && !hasPlayedEntrySoundRef.current) {
+      playSound(glitchBufferRef.current, 0.1);
+      hasPlayedEntrySoundRef.current = true;
+    } else if (offset < 0.3) {
+      // Reset when scrolling back up so it can fire again
+      hasPlayedEntrySoundRef.current = false;
+    }
   });
 
   return (
