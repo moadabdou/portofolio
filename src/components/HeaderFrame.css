@@ -1,0 +1,152 @@
+.header-frame-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* New layout for pills */
+.frame-pills {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+
+/* Pumps (Pills) styling */
+.pump {
+  position: absolute;
+  right: 25px;
+  width: 360px;
+  /* Much wider as requested */
+  height: 70px;
+  background-color: white;
+  border-radius: 35px;
+  padding: 0 10px 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+
+
+.cv-pump {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130px;
+  height: 60px;
+  border-radius: 30px;
+  padding: 0 20px;
+  right: auto;
+  text-decoration: none;
+  color: inherit;
+}
+
+.projects-pump {
+  width: 180px;
+}
+
+
+.cv-pump .pump-info {
+  text-align: center;
+}
+
+.cv-pump .pump-name {
+  font-size: 1.1rem;
+}
+
+.cv-pump .pump-label {
+  font-size: 0.6rem;
+}
+
+.upper-pump {
+  top: 15px;
+  right: 25px;
+}
+
+.lower-pump {
+  bottom: 15px;
+  right: 25px;
+}
+
+
+
+
+
+
+
+
+
+
+
+.pump-info {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.pump-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #333;
+  letter-spacing: 1px;
+  font-family: 'BigsRobotic', sans-serif;
+}
+
+.pump-label {
+  margin: 0;
+  font-size: 10px;
+  color: #888;
+  letter-spacing: 2px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.pump-image {
+  width: 360px;
+  height: 54px;
+  border-radius: 27px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pump-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* Energy Trace Animation */
+.energy-trace {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: energyFlow 12s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes energyFlow {
+  0% {
+    stroke-dashoffset: 800;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
