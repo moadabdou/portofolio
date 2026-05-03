@@ -268,6 +268,8 @@ function ProjectCard({ url, index, total, radius, startAngle, endAngle, xOffset,
 
 export function ProjectsGallery() {
   const galleryRef = useRef();
+  const audioCtxRef = useRef(null);
+  const audioBufferRef = useRef(null);
   const scroll = useScroll();
 
   // Tweakable parameters for the arc in the YZ plane
@@ -292,6 +294,18 @@ export function ProjectsGallery() {
   const [glitchIntensity, setGlitchIntensity] = useState(0);
   const currentRotation = useRef(0);
 
+  // Pre-decode whoosh audio for zero-latency playback
+  useEffect(() => {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtxRef.current = ctx;
+    fetch('/audio/alexzavesa-woosh-game-glitch-4-463026.mp3')
+      .then((r) => r.arrayBuffer())
+      .then((ab) => ctx.decodeAudioData(ab))
+      .then((buf) => { audioBufferRef.current = buf; })
+      .catch(() => {});
+    return () => ctx.close();
+  }, []);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -304,6 +318,22 @@ export function ProjectsGallery() {
       } else if (e.key === 'ArrowLeft') {
         galleryState.index = (galleryState.index - 1 + PROJECTS.length) % PROJECTS.length;
         galleryState.targetRotation += (Math.PI * 2) / PROJECTS.length;
+      } else {
+        return; // not a navigation key — skip sound
+      }
+
+      // Play pre-decoded whoosh (no decode delay)
+      if (audioCtxRef.current && audioBufferRef.current) {
+        if (audioCtxRef.current.state === 'suspended') {
+          audioCtxRef.current.resume();
+        }
+        const src = audioCtxRef.current.createBufferSource();
+        src.buffer = audioBufferRef.current;
+        const gain = audioCtxRef.current.createGain();
+        gain.gain.value = 0.5;
+        src.connect(gain);
+        gain.connect(audioCtxRef.current.destination);
+        src.start(0);
       }
     };
 

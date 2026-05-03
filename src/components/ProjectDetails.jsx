@@ -13,6 +13,21 @@ export default function ProjectDetails() {
   const descRef = useRef(null);
   const magneticRef = useRef(null);
   const proximityRef = useRef(0);
+  const glitchAudioCtxRef = useRef(null);
+  const glitchAudioBufferRef = useRef(null);
+  const isSectionVisible = useRef(false);
+
+  // Pre-decode glitch sound for zero-latency playback
+  useEffect(() => {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    glitchAudioCtxRef.current = ctx;
+    fetch('/audio/virtual_vibes-glitch-sound-effect-hd-379466.mp3')
+      .then((r) => r.arrayBuffer())
+      .then((ab) => ctx.decodeAudioData(ab))
+      .then((buf) => { glitchAudioBufferRef.current = buf; })
+      .catch(() => {});
+    return () => ctx.close();
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -72,11 +87,25 @@ export default function ProjectDetails() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  const playGlitchSound = () => {
+    if (glitchAudioCtxRef.current && glitchAudioBufferRef.current) {
+      if (glitchAudioCtxRef.current.state === 'suspended') {
+        glitchAudioCtxRef.current.resume();
+      }
+      const src = glitchAudioCtxRef.current.createBufferSource();
+      src.buffer = glitchAudioBufferRef.current;
+      const gain = glitchAudioCtxRef.current.createGain();
+      gain.gain.value = 0.2;
+      src.connect(gain);
+      gain.connect(glitchAudioCtxRef.current.destination);
+      src.start(glitchAudioCtxRef.current.currentTime + 0.5);
+    }
+  };
+
   useFrame(() => {
     if (!containerRef.current) return;
 
     // The gallery is on the second page (0.5 to 1.0)
-    // We'll show the info when scroll is between 0.6 and 1.0
     const rawOffset = scroll.offset;
     const visibility = Math.min(1, Math.max(0, (rawOffset - 0.6) / 0.1));
 
@@ -86,21 +115,33 @@ export default function ProjectDetails() {
     // Sync with galleryState
     const projectIndex = galleryState.index;
     const project = PROJECTS[projectIndex];
+    const isTitleDifferent = titleRef.current && titleRef.current.innerText !== project.title;
 
-    if (titleRef.current && titleRef.current.innerText !== project.title) {
-      titleRef.current.innerText = project.title;
-      titleRef.current.setAttribute('data-text', project.title);
-      descRef.current.innerText = project.description;
-      descRef.current.setAttribute('data-text', project.description);
-      
-      // Update link via the actual a tag which is now inside the wrappers
-      const actualLink = magneticRef.current.querySelector('a');
-      if (actualLink) actualLink.href = project.github;
+    if (visibility > 0.1) {
+      if (isTitleDifferent) {
+        const isInitialLoad = titleRef.current && titleRef.current.innerText === "";
 
-      // Trigger a small entrance animation for the text
-      containerRef.current.classList.remove('update-anim');
-      void containerRef.current.offsetWidth; // trigger reflow
-      containerRef.current.classList.add('update-anim');
+        // Update Text
+        if (titleRef.current) {
+          titleRef.current.innerText = project.title;
+          titleRef.current.setAttribute('data-text', project.title);
+          descRef.current.innerText = project.description;
+          descRef.current.setAttribute('data-text', project.description);
+          const actualLink = magneticRef.current.querySelector('a');
+          if (actualLink) actualLink.href = project.github;
+        }
+
+        // Trigger Glitch (Sound + CSS) ONLY on navigation (not initial load)
+        if (!isInitialLoad) {
+          playGlitchSound();
+          containerRef.current.classList.remove('update-anim');
+          void containerRef.current.offsetWidth;
+          containerRef.current.classList.add('update-anim');
+        }
+      }
+      isSectionVisible.current = true;
+    } else if (visibility < 0.05) {
+      isSectionVisible.current = false;
     }
 
     // Gentle parallax/float
