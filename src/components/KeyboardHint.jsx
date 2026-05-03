@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useScroll } from '@react-three/drei';
 import * as THREE from 'three';
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import './KeyboardHint.css';
 
 const KeyboardHint = () => {
@@ -10,32 +11,41 @@ const KeyboardHint = () => {
 
   useFrame(() => {
     if (!hintRef.current) return;
-    
-    // Show hint only when projects are visible (scroll > 0.6)
+
+    // Show hint when page 2 starts (offset > 0.5)
     const offset = scroll.offset;
-    const opacity = Math.min(1, Math.max(0, (offset - 0.7) * 10)); // Fade in quickly after 0.7
-    
+    const opacity = Math.min(1, Math.max(0, (offset - 0.5) * 10));
+
     hintRef.current.style.opacity = opacity;
     hintRef.current.style.visibility = opacity <= 0.01 ? 'hidden' : 'visible';
-    hintRef.current.style.transform = `translateY(${THREE.MathUtils.lerp(20, 0, opacity)}px)`;
+
+    // Set static transform
+    if (opacity > 0) {
+      hintRef.current.style.transform = `translateX(-50%)`;
+    }
   });
 
   return (
     <div className="keyboard-hint-container" ref={hintRef}>
-      <div className="hint-content">
-        <div className="key-icon left-key">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 12H5M5 12L12 19M5 12L12 5" />
-          </svg>
+      <div className="arrow-cluster">
+        <div className="arrow-row top-row">
+          <div className="key-cap up-key inactive">
+            <ChevronUp size={20} />
+          </div>
         </div>
-        <div className="hint-text">USE ARROW KEYS TO NAVIGATE</div>
-        <div className="key-icon right-key">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M5 12H19M19 12L12 5M19 12L12 19" />
-          </svg>
+        <div className="arrow-row bottom-row">
+          <div className="key-cap left-key active-glow">
+            <ChevronLeft size={20} />
+          </div>
+          <div className="key-cap down-key inactive">
+            <ChevronDown size={20} />
+          </div>
+          <div className="key-cap right-key active-glow">
+            <ChevronRight size={20} />
+          </div>
         </div>
       </div>
-      <div className="hint-glow"></div>
+      <div className="hint-note">USE KEYBOARD TO NAVIGATE</div>
     </div>
   );
 };

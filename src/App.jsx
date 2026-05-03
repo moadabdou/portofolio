@@ -139,8 +139,8 @@ export default function App() {
 
                 <section style={{ height: '100vh', position: 'relative' }}>
                   <ProjectDetails />
+                  <KeyboardHint />
                 </section>
-                <KeyboardHint />
               </div>
             </Scroll>
           </ScrollControls>
