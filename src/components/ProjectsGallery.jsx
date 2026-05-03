@@ -163,7 +163,7 @@ export const PROJECTS = [
 ];
 
 
-function ProjectCard({ url, title, index, total, radius, startAngle, endAngle, xOffset, glitchIntensity }) {
+function ProjectCard({ url, index, total, radius, startAngle, endAngle, xOffset, glitchIntensity }) {
   const groupRef = useRef();
   const meshRef = useRef();
   const frameRef = useRef();
@@ -261,18 +261,7 @@ function ProjectCard({ url, title, index, total, radius, startAngle, endAngle, x
         <meshBasicMaterial color="#a629ff" wireframe transparent opacity={0.2} toneMapped={false} />
       </mesh>
 
-      <Text
-        position={[0, -0.65, 0.1]}
-        fontSize={0.15}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.015}
-        outlineColor="#a629ff"
-      // If the text needs to be rotated to be readable, you can add a rotation prop here
-      >
-        {title}
-      </Text>
+
     </group>
   );
 }
@@ -346,7 +335,6 @@ export function ProjectsGallery() {
           <ProjectCard
             key={project.id}
             url={project.img}
-            title={project.title}
             index={i}
             total={PROJECTS.length}
             radius={radius}
