@@ -331,35 +331,31 @@ export function ProjectsGallery() {
     galleryRef.current.scale.setScalar(THREE.MathUtils.lerp(0.001, 1, scaleProgress));
     galleryRef.current.visible = scaleProgress > 0.01;
 
-    // Smoothly rotate the gallery
+    // Smoothly update the current rotation (used for the axis pulse or other local effects)
     currentRotation.current = THREE.MathUtils.lerp(currentRotation.current, galleryState.targetRotation, delta * 4);
-    galleryRef.current.rotation.x = currentRotation.current;
-
+    
     const intensity = Math.pow(1.0 - glitchProgress, 1.0);
     setGlitchIntensity(intensity);
   });
 
   return (
-    // Apply the same rotation as SpaceStation
-    <group rotation={[1.9, 2.35, -.55]}>
-      {/* Wrapper group to shift the mathematical center to match the visual center */}
-      <group position={[centerX, centerY, centerZ]}>
-        <group ref={galleryRef}>
-          {PROJECTS.map((project, i) => (
-            <ProjectCard
-              key={project.id}
-              url={project.img}
-              title={project.title}
-              index={i}
-              total={PROJECTS.length}
-              radius={radius}
-              startAngle={startAngle}
-              endAngle={endAngle}
-              xOffset={xOffset}
-              glitchIntensity={glitchIntensity}
-            />
-          ))}
-        </group>
+    // Wrapper group to shift the mathematical center to match the visual center
+    <group position={[centerX, centerY, centerZ]}>
+      <group ref={galleryRef}>
+        {PROJECTS.map((project, i) => (
+          <ProjectCard
+            key={project.id}
+            url={project.img}
+            title={project.title}
+            index={i}
+            total={PROJECTS.length}
+            radius={radius}
+            startAngle={startAngle}
+            endAngle={endAngle}
+            xOffset={xOffset}
+            glitchIntensity={glitchIntensity}
+          />
+        ))}
       </group>
     </group>
   );

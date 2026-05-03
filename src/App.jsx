@@ -27,6 +27,8 @@ const mouse = { x: 0, y: 0 };
 function Scene() {
   const groupRef = useRef();
   const stationGroupRef = useRef();
+  const sharedRotationRef = useRef();
+  const currentRotation = useRef(0);
   const scroll = useScroll();
 
   useEffect(() => {
@@ -63,6 +65,12 @@ function Scene() {
       stationGroupRef.current.rotation.x = THREE.MathUtils.lerp(-0.5, 2, offset);
       stationGroupRef.current.rotation.z = THREE.MathUtils.lerp(-0.5, 0.2, offset);
     }
+
+    if (sharedRotationRef.current) {
+      // Smoothly rotate the shared group (SpaceStation + Gallery) around the tilted X-axis
+      currentRotation.current = THREE.MathUtils.lerp(currentRotation.current, galleryState.targetRotation, delta * 4);
+      sharedRotationRef.current.rotation.x = currentRotation.current;
+    }
   });
 
   return (
@@ -76,12 +84,19 @@ function Scene() {
       <pointLight position={[-6, -4, -8]} intensity={5} color="#fb00c9" distance={20} decay={2} />
 
       <group ref={stationGroupRef}>
-        <SpaceStation
-          scale={1}
-          position={[0, 0, 0]}
-          rotation={[0.2, 0, 0.5]}
-        />
-        <ProjectsGallery />
+        {/* The Tilted Axis: matches the rotation needed for the station's ring */}
+        <group rotation={[1.9, 2.35, -.55]}>
+          {/* The Spin: rotates both objects around the tilted X-axis */}
+          <group ref={sharedRotationRef}>
+            <SpaceStation
+              scale={1}
+              position={[0, 0, 0]}
+              // Local rotation calculated to maintain the original look [0.2, 0, 0.5] inside the tilt
+              rotation={[-1.4698, -0.4558, -1.8012]}
+            />
+            <ProjectsGallery />
+          </group>
+        </group>
       </group>
     </group>
   );
