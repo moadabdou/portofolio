@@ -11,6 +11,7 @@ import { WakeEffect } from './effects/MouseRipple';
 import MoadName from './components/MoadName';
 import HeaderFrame from './components/HeaderFrame';
 import { ProjectsGallery } from './components/ProjectsGallery';
+import ProjectDetails from './components/ProjectDetails';
 
 export const scrollState = { offset: 0 };
 
@@ -120,7 +121,7 @@ export default function App() {
                 </section>
 
                 <section style={{ height: '100vh', position: 'relative' }}>
-                  {/* Second page - user will add projects here */}
+                  <ProjectDetails />
                 </section>
               </div>
             </Scroll>

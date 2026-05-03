@@ -1,0 +1,192 @@
+.project-details-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding-left: 200px;
+  /* Slightly less padding-left but more width to spread right */
+  transform: translateY(-50%);
+  z-index: 100;
+  pointer-events: auto;
+  transition: opacity 0.5s ease;
+  width: 550px;
+  /* Increased from 400px */
+}
+
+.project-details-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: 'Share Tech Mono', monospace;
+  color: #ffffff;
+}
+
+.project-label {
+  font-size: 0.8rem;
+  color: #cf00f3;
+  letter-spacing: 0.3em;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+}
+
+.project-title {
+  font-family: 'BigsRobotic', sans-serif;
+  font-size: 3rem;
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 0 15px rgba(207, 0, 243, 0.6);
+  letter-spacing: 0.1em;
+  line-height: 1;
+  position: relative;
+}
+
+.project-title::before,
+.project-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.project-title:hover::before {
+  color: #ff00ff;
+  z-index: -1;
+  animation: glitch-text 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+
+.project-title:hover::after {
+  color: #00ffff;
+  z-index: -2;
+  animation: glitch-text 0.3s cubic-bezier(.25, .46, .45, .94) reverse both infinite;
+}
+
+@keyframes glitch-text {
+  0% {
+    transform: translate(0)
+  }
+
+  20% {
+    transform: translate(-2px, 2px)
+  }
+
+  40% {
+    transform: translate(-2px, -2px)
+  }
+
+  60% {
+    transform: translate(2px, 2px)
+  }
+
+  80% {
+    transform: translate(2px, -2px)
+  }
+
+  100% {
+    transform: translate(0)
+  }
+}
+
+.project-description {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  line-height: 1.7;
+  max-width: 500px;
+  opacity: 0.85;
+  color: #e0e0e0;
+  letter-spacing: 0.02em;
+  /* Removed uppercase for better readability of long descriptions */
+}
+
+.project-github-link {
+  margin-top: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #cf00f3;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  padding: 0.8rem 1.8rem;
+
+  border: 1px solid rgba(207, 0, 243, 0.4);
+  background: rgba(207, 0, 243, 0.05);
+  backdrop-filter: blur(5px);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.github-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.4s ease;
+}
+
+.project-github-link:hover .github-icon {
+  transform: rotate(12deg) scale(1.1);
+}
+
+.project-github-link:hover {
+  background: rgba(207, 0, 243, 0.2);
+  border-color: #cf00f3;
+  box-shadow: 0 0 20px rgba(207, 0, 243, 0.4);
+  transform: translateX(10px);
+}
+
+.link-arrow {
+  transition: transform 0.3s ease;
+}
+
+.project-github-link:hover .link-arrow {
+  transform: translateX(5px);
+}
+
+/* Entrance animation when project changes */
+.update-anim {
+  animation: projectIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes projectIn {
+  0% {
+    opacity: 0;
+    transform: translateX(30px) translateY(-50%);
+    filter: blur(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(-50%);
+    filter: blur(0);
+  }
+}
+
+/* Decorative elements */
+.project-details-decoration {
+  position: absolute;
+  left: 160px;
+  top: -20px;
+  height: calc(100% + 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.deco-line {
+  width: 1px;
+  flex-grow: 1;
+  background: linear-gradient(to bottom, transparent, #cf00f3, #cf00f3, transparent);
+  opacity: 0.5;
+}
+
+.deco-square {
+  width: 6px;
+  height: 6px;
+  border: 1px solid #cf00f3;
+  transform: rotate(45deg);
+  margin: 10px 0;
+  box-shadow: 0 0 8px rgba(207, 0, 243, 0.4);
+}

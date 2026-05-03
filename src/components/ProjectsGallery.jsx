@@ -123,12 +123,42 @@ const GlitchFrameMaterial = shaderMaterial(
 
 extend({ GlitchMaterial, GlitchFrameMaterial });
 
-const PROJECTS = [
-  { id: 1, img: '/projects/p1.png', title: 'PROJECT ALPHA' },
-  { id: 2, img: '/projects/p2.png', title: 'PROJECT BETA' },
-  { id: 3, img: '/projects/p3.png', title: 'PROJECT GAMMA' },
-  { id: 4, img: '/projects/p4.png', title: 'PROJECT DELTA' },
-  { id: 5, img: '/projects/p5.png', title: 'PROJECT EPSILON' },
+export const PROJECTS = [
+  { 
+    id: 1, 
+    img: '/projects/p1.png', 
+    title: 'AERO SPEECH', 
+    description: 'A cutting-edge hybrid Text-to-Speech engine engineered for ultra-low latency and natural prosody. Built with a distributed backend architecture to handle high-concurrency real-time audio synthesis at scale.',
+    github: 'https://github.com/moadabdou/aerospeech'
+  },
+  { 
+    id: 2, 
+    img: '/projects/p2.png', 
+    title: 'NEURAL NEXUS', 
+    description: 'Advanced deep learning orchestration platform that simplifies the deployment of complex neural networks. Features automated hyperparameter tuning and seamless scaling across multi-GPU environments.',
+    github: 'https://github.com/moadabdou/neural-nexus'
+  },
+  { 
+    id: 3, 
+    img: '/projects/p3.png', 
+    title: 'CYBER CORE', 
+    description: 'Enterprise-grade cybersecurity monitoring system utilizing transformer-based anomaly detection. It provides real-time threat intelligence and automated incident response for critical infrastructure.',
+    github: 'https://github.com/moadabdou/cyber-core'
+  },
+  { 
+    id: 4, 
+    img: '/projects/p4.png', 
+    title: 'VIRTUAL VORTEX', 
+    description: 'A high-performance WebGL visualization engine designed for rendering complex fluid dynamics and particle systems in real-time. Leverages custom GLSL shaders for cinematic-quality visual effects.',
+    github: 'https://github.com/moadabdou/virtual-vortex'
+  },
+  { 
+    id: 5, 
+    img: '/projects/p5.png', 
+    title: 'QUANTUM QUARTZ', 
+    description: 'High-dimensional data analytics suite specialized in quantum computing simulations. Offers immersive 3D visualizations and predictive modeling for multi-variable experimental datasets.',
+    github: 'https://github.com/moadabdou/quantum-quartz'
+  },
 ];
 
 
