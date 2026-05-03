@@ -127,7 +127,7 @@ export default function App() {
           </ScrollControls>
 
           <EffectComposer disableNormalPass>
-            <Bloom luminanceThreshold={0.3} luminanceSmoothing={0.9} height={300} intensity={2} mipmapBlur />
+            <Bloom luminanceThreshold={0.9} luminanceSmoothing={0.9} height={300} intensity={1.5} mipmapBlur />
             <ChromaticAberration
               blendFunction={BlendFunction.NORMAL}
               offset={new Vector2(0.002, 0.002)}

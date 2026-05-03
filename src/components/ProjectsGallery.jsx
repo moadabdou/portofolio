@@ -1,8 +1,127 @@
-import React, { useMemo, useRef } from 'react';
-import { useTexture, Text } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { useScroll } from '@react-three/drei';
+import React, { useMemo, useRef, useState } from 'react';
+import { useTexture, Text, shaderMaterial, useScroll } from '@react-three/drei';
+import { useFrame, extend } from '@react-three/fiber';
 import * as THREE from 'three';
+
+const GlitchMaterial = shaderMaterial(
+  {
+    uTexture: null,
+    uTime: 0,
+    uGlitchIntensity: 0,
+    uColor: new THREE.Color('#d0d0d0'),
+  },
+  // Vertex Shader
+  `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+  `,
+  // Fragment Shader
+  `
+  uniform sampler2D uTexture;
+  uniform float uTime;
+  uniform float uGlitchIntensity;
+  uniform vec3 uColor;
+  varying vec2 vUv;
+
+  float rand(vec2 co){
+      return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+  }
+
+  void main() {
+      vec2 uv = vUv;
+
+      // 1. Wave Displacement (Fluctuation)
+      float wave = sin(uv.y * 20.0 + uTime * 10.0) * 0.015 * uGlitchIntensity;
+      float wave2 = cos(uv.x * 15.0 + uTime * 7.0) * 0.01 * uGlitchIntensity;
+      uv.x += wave;
+      uv.y += wave2;
+
+      // 2. Image Tearing
+      float tearY = floor(uv.y * 15.0 + uTime * 2.0);
+      if (rand(vec2(tearY, 1.0)) > (1.0 - 0.15 * uGlitchIntensity)) {
+          uv.x += (rand(vec2(tearY, uTime)) - 0.5) * 0.1 * uGlitchIntensity;
+      }
+
+      // 3. Chromatic Aberration (RGB Split)
+      float offset = 0.03 * uGlitchIntensity;
+      vec4 sampleR = texture2D(uTexture, uv + vec2(offset, 0.0));
+      vec4 sampleG = texture2D(uTexture, uv);
+      vec4 sampleB = texture2D(uTexture, uv - vec2(offset, 0.0));
+      
+      vec3 texColor = vec3(sampleR.r, sampleG.g, sampleB.b);
+
+      // 4. Scanlines
+      float scanline = sin(uv.y * 800.0) * 0.1 * uGlitchIntensity;
+      texColor -= scanline;
+
+      // Final color with alpha from texture
+      gl_FragColor = vec4(texColor * uColor, sampleG.a);
+  }
+  `
+);
+
+const GlitchFrameMaterial = shaderMaterial(
+  {
+    uTexture: null,
+    uTime: 0,
+    uGlitchIntensity: 0,
+    uColor: new THREE.Color('#a629ff'),
+    uOpacity: 0.6,
+  },
+  // Vertex Shader
+  `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+  `,
+  // Fragment Shader
+  `
+  uniform sampler2D uTexture;
+  uniform float uTime;
+  uniform float uGlitchIntensity;
+  uniform vec3 uColor;
+  uniform float uOpacity;
+  varying vec2 vUv;
+
+  float rand(vec2 co){
+      return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+  }
+
+  void main() {
+      vec2 uv = vUv;
+
+      // Glitch logic (sync with main image)
+      float wave = sin(uv.y * 20.0 + uTime * 10.0) * 0.015 * uGlitchIntensity;
+      uv.x += wave;
+
+      float tearY = floor(uv.y * 15.0 + uTime * 2.0);
+      if (rand(vec2(tearY, 1.0)) > (1.0 - 0.15 * uGlitchIntensity)) {
+          uv.x += (rand(vec2(tearY, uTime)) - 0.5) * 0.1 * uGlitchIntensity;
+      }
+
+      float offset = 0.02 * uGlitchIntensity;
+      float maskR = texture2D(uTexture, uv + vec2(offset, 0.0)).r;
+      float maskG = texture2D(uTexture, uv).r;
+      float maskB = texture2D(uTexture, uv - vec2(offset, 0.0)).r;
+
+      vec3 finalColor = uColor * maskG;
+      // Add RGB split glow
+      finalColor.r += maskR * 0.5 * uGlitchIntensity;
+      finalColor.b += maskB * 0.5 * uGlitchIntensity;
+
+      float alpha = max(maskG, max(maskR, maskB)) * uOpacity;
+      
+      gl_FragColor = vec4(finalColor, alpha);
+  }
+  `
+);
+
+extend({ GlitchMaterial, GlitchFrameMaterial });
 
 const PROJECTS = [
   { id: 1, img: '/projects/p1.png', title: 'PROJECT ALPHA' },
@@ -13,11 +132,17 @@ const PROJECTS = [
 ];
 
 
-function ProjectCard({ url, title, index, total, radius, startAngle, endAngle, xOffset, rotX, rotY, rotZ }) {
+function ProjectCard({ url, title, index, total, radius, startAngle, endAngle, xOffset, glitchIntensity }) {
   const groupRef = useRef();
   const meshRef = useRef();
   const frameRef = useRef();
+  const hudMeshRef = useRef();
   const texture = useTexture(url);
+  const hudTexture = useTexture('/hud_frame.png');
+
+  // Ensure textures are in the correct color space for vibrant colors
+  if (texture) texture.colorSpace = THREE.SRGBColorSpace;
+  if (hudTexture) hudTexture.colorSpace = THREE.SRGBColorSpace;
 
   // Calculate position along the arc in the YZ plane
   const progress = total > 1 ? index / (total - 1) : 0;
@@ -30,17 +155,30 @@ function ProjectCard({ url, title, index, total, radius, startAngle, endAngle, x
   const geometry = useMemo(() => {
     const width = 1.6;
     const height = 2.2;
-    // We bend along the Y axis (height) to wrap the rim, so we need segments along Y
     const segments = 32;
     const geo = new THREE.PlaneGeometry(width, height, 1, segments);
-
-    // Bend the plane along its Y axis (height) to wrap around the outer rim
     const pos = geo.attributes.position;
-    const curveAmount = 0.2; // Adjust for perfect hug
+    const curveAmount = 0.2;
     for (let i = 0; i < pos.count; i++) {
       const vy = pos.getY(i);
-      // Bend backwards (-Z) so it hugs the ring
-      pos.setZ(i, -Math.pow(vy / (height / 2), 2) * curveAmount);
+      pos.setZ(i, -Math.pow(vy / 1.1, 2) * curveAmount);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }, []);
+
+  const hudGeometry = useMemo(() => {
+    const width = 1.6 * 1.25;
+    const height = 2.2 * 2.05;
+    const segments = 32;
+    const geo = new THREE.PlaneGeometry(width, height, 1, segments);
+    const pos = geo.attributes.position;
+    const curveAmount = 0.2; // Keep the same curvature coefficient as the image
+    for (let i = 0; i < pos.count; i++) {
+      const vy = pos.getY(i);
+      // vy here goes from -height/2 to height/2
+      // We want to match the image's curve: z = - (y / 1.1)^2 * 0.2
+      pos.setZ(i, -Math.pow(vy / 1.1, 2) * curveAmount);
     }
     geo.computeVertexNormals();
     return geo;
@@ -48,6 +186,18 @@ function ProjectCard({ url, title, index, total, radius, startAngle, endAngle, x
 
   useFrame((state) => {
     if (!groupRef.current) return;
+
+    if (meshRef.current && meshRef.current.material) {
+      meshRef.current.material.uTime = state.clock.elapsedTime;
+      meshRef.current.material.uGlitchIntensity = glitchIntensity;
+    }
+
+    if (hudMeshRef.current && hudMeshRef.current.material) {
+      hudMeshRef.current.material.uTime = state.clock.elapsedTime;
+      hudMeshRef.current.material.uGlitchIntensity = glitchIntensity;
+      // Pulse opacity slightly
+      hudMeshRef.current.material.uOpacity = 0.4 + Math.sin(state.clock.elapsedTime * 2 + index) * 0.1;
+    }
 
     // Glitch-like pulse on the wireframe instead of the image
     if (frameRef.current && frameRef.current.material) {
@@ -58,17 +208,28 @@ function ProjectCard({ url, title, index, total, radius, startAngle, endAngle, x
   return (
     <group ref={groupRef} position={[x, y, z]} rotation={[-angle, 0, -Math.PI]}>
       <mesh ref={meshRef} geometry={geometry}>
-        <meshBasicMaterial
-          map={texture}
+        <glitchMaterial
+          uTexture={texture}
           transparent
-          opacity={0.95}
           side={THREE.DoubleSide}
-          color="#999999" // Dim the brightest whites so they don't trigger the global Bloom effect
+          toneMapped={true}
         />
-        {/* Neon Frame */}
-        <mesh ref={frameRef} geometry={geometry} scale={1.01} position={[0, 0, -0.01]}>
-          <meshBasicMaterial color="#a629ff" wireframe transparent opacity={0.5} toneMapped={false} />
-        </mesh>
+      </mesh>
+
+      {/* HUD Tech Frame */}
+      <mesh ref={hudMeshRef} geometry={hudGeometry} position={[0, 0, 0.01]}>
+        <glitchFrameMaterial
+          uTexture={hudTexture}
+          transparent
+          uColor="#ef4bfbff"
+          toneMapped={false}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Neon Wireframe (Original) - Keep but fade out if needed */}
+      <mesh ref={frameRef} geometry={geometry} scale={[1.01, 1.01, 1.01 * 1.01]} position={[0, 0, -0.01]}>
+        <meshBasicMaterial color="#a629ff" wireframe transparent opacity={0.2} toneMapped={false} />
       </mesh>
 
       <Text
@@ -110,13 +271,21 @@ export function ProjectsGallery() {
   const rotY = 0;
   const rotZ = Math.PI; // Tweak this if the images are sideways or upside down
 
-  useFrame((_, delta) => {
+  const [glitchIntensity, setGlitchIntensity] = useState(0);
+
+  useFrame((state) => {
     if (!galleryRef.current) return;
     const offset = scroll.offset;
-    const page2Progress = THREE.MathUtils.smoothstep(offset, 0.45, 0.8);
+    const scaleProgress = THREE.MathUtils.smoothstep(offset, 0.45, 0.8);
+    // Glitch starts slightly before scaling and lasts much longer (until 0.95 scroll)
+    const glitchProgress = THREE.MathUtils.smoothstep(offset, 0.4, 0.98);
 
-    galleryRef.current.scale.setScalar(THREE.MathUtils.lerp(0.001, 1, page2Progress));
-    galleryRef.current.visible = page2Progress > 0.01;
+    galleryRef.current.scale.setScalar(THREE.MathUtils.lerp(0.001, 1, scaleProgress));
+    galleryRef.current.visible = scaleProgress > 0.01;
+
+    // Use a slower decay (exponent 1.0 instead of 1.5) to keep the glitch visible longer
+    const intensity = Math.pow(1.0 - glitchProgress, 1.0);
+    setGlitchIntensity(intensity);
   });
 
   return (
@@ -136,6 +305,7 @@ export function ProjectsGallery() {
               startAngle={startAngle}
               endAngle={endAngle}
               xOffset={xOffset}
+              glitchIntensity={glitchIntensity}
             />
           ))}
         </group>
