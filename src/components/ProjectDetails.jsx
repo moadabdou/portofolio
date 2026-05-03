@@ -91,6 +91,7 @@ export default function ProjectDetails() {
       titleRef.current.innerText = project.title;
       titleRef.current.setAttribute('data-text', project.title);
       descRef.current.innerText = project.description;
+      descRef.current.setAttribute('data-text', project.description);
       
       // Update link via the actual a tag which is now inside the wrappers
       const actualLink = magneticRef.current.querySelector('a');
@@ -111,7 +112,7 @@ export default function ProjectDetails() {
     <div className="project-details-container" ref={containerRef}>
       <div className="project-details-content">
         <h2 className="project-title" ref={titleRef}></h2>
-        <p className="project-description" ref={descRef}></p>
+        <p className="project-description" ref={descRef} data-text=""></p>
         <div className="github-magnetic-wrapper" ref={magneticRef}>
           <a
             className="project-github-link"

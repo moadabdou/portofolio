@@ -96,7 +96,77 @@
   opacity: 0.85;
   color: #e0e0e0;
   letter-spacing: 0.02em;
+  position: relative;
   /* Removed uppercase for better readability of long descriptions */
+}
+
+/* Glitch layers for description */
+.project-description::before,
+.project-description::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.update-anim .project-description {
+  animation: description-reveal 0.8s steps(1) forwards;
+}
+
+.update-anim .project-description::before {
+  color: #ff00ff;
+  z-index: -1;
+  animation: description-glitch-1 0.8s steps(2) forwards;
+}
+
+.update-anim .project-description::after {
+  color: #00ffff;
+  z-index: -2;
+  animation: description-glitch-2 0.8s steps(2) forwards;
+}
+
+@keyframes description-reveal {
+  0% { opacity: 0; transform: translateX(10px); }
+  5% { opacity: 1; transform: translateX(-2px); }
+  10% { opacity: 0; transform: translateX(5px); }
+  15% { opacity: 0.8; transform: translateX(-8px); }
+  20% { opacity: 0; }
+  25% { opacity: 1; transform: translateX(3px); }
+  30% { opacity: 0; }
+  35% { opacity: 0.5; transform: translateX(-3px); }
+  40% { opacity: 0.1; }
+  45% { opacity: 1; transform: translateX(4px); }
+  50% { opacity: 0; }
+  55% { opacity: 0.8; transform: translateX(-2px); }
+  60% { opacity: 0.2; }
+  65% { opacity: 1; transform: translateX(0); }
+  70% { opacity: 0.4; }
+  75% { opacity: 0.9; }
+  80% { opacity: 1; }
+  100% { opacity: 0.85; }
+}
+
+@keyframes description-glitch-1 {
+  0% { opacity: 0.8; clip-path: inset(10% 0 80% 0); transform: translate(-5px, 2px); }
+  20% { opacity: 0; }
+  40% { opacity: 0.7; clip-path: inset(60% 0 10% 0); transform: translate(5px, -2px); }
+  60% { opacity: 0; }
+  80% { opacity: 0.5; clip-path: inset(30% 0 40% 0); transform: translate(-2px, 3px); }
+  100% { opacity: 0; }
+}
+
+@keyframes description-glitch-2 {
+  0% { opacity: 0; }
+  10% { opacity: 0.8; clip-path: inset(80% 0 10% 0); transform: translate(5px, -2px); }
+  30% { opacity: 0; }
+  50% { opacity: 0.7; clip-path: inset(10% 0 60% 0); transform: translate(-5px, 2px); }
+  70% { opacity: 0; }
+  90% { opacity: 0.5; clip-path: inset(40% 0 30% 0); transform: translate(2px, -3px); }
+  100% { opacity: 0; }
 }
 
 .github-magnetic-wrapper {
