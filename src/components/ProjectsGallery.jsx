@@ -2,7 +2,9 @@ import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useTexture, Text, shaderMaterial, useScroll } from '@react-three/drei';
 import { useFrame, extend } from '@react-three/fiber';
 import * as THREE from 'three';
-import { galleryState } from '../App';
+import { galleryState } from '../portfolioState';
+import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
+import { clamp, getPageOffset } from '../utils/portfolioTimeline';
 
 const GlitchMaterial = shaderMaterial(
   {
@@ -10,6 +12,7 @@ const GlitchMaterial = shaderMaterial(
     uTime: 0,
     uGlitchIntensity: 0,
     uColor: new THREE.Color('#d0d0d0'),
+    uOpacity: 1.0,
   },
   // Vertex Shader
   `
@@ -25,6 +28,7 @@ const GlitchMaterial = shaderMaterial(
   uniform float uTime;
   uniform float uGlitchIntensity;
   uniform vec3 uColor;
+  uniform float uOpacity;
   varying vec2 vUv;
 
   float rand(vec2 co){
@@ -59,7 +63,7 @@ const GlitchMaterial = shaderMaterial(
       texColor -= scanline;
 
       // Final color with alpha from texture
-      gl_FragColor = vec4(texColor * uColor, sampleG.a);
+      gl_FragColor = vec4(texColor * uColor, sampleG.a * uOpacity);
   }
   `
 );
@@ -163,7 +167,7 @@ export const PROJECTS = [
 ];
 
 
-function ProjectCard({ url, index, total, radius, startAngle, endAngle, xOffset, glitchIntensity }) {
+function ProjectCard({ url, index, total, radius, startAngle, endAngle, xOffset, glitchIntensity, opacity }) {
   const groupRef = useRef();
   const meshRef = useRef();
   const frameRef = useRef();
@@ -219,18 +223,20 @@ function ProjectCard({ url, index, total, radius, startAngle, endAngle, xOffset,
     if (meshRef.current && meshRef.current.material) {
       meshRef.current.material.uTime = state.clock.elapsedTime;
       meshRef.current.material.uGlitchIntensity = glitchIntensity;
+      meshRef.current.material.uOpacity = opacity;
     }
 
     if (hudMeshRef.current && hudMeshRef.current.material) {
       hudMeshRef.current.material.uTime = state.clock.elapsedTime;
       hudMeshRef.current.material.uGlitchIntensity = glitchIntensity;
-      // Pulse opacity slightly
-      hudMeshRef.current.material.uOpacity = 0.4 + Math.sin(state.clock.elapsedTime * 2 + index) * 0.1;
+      // Pulse opacity slightly, then multiply by global opacity
+      const pulse = 0.4 + Math.sin(state.clock.elapsedTime * 2 + index) * 0.1;
+      hudMeshRef.current.material.uOpacity = pulse * opacity;
     }
 
     // Glitch-like pulse on the wireframe instead of the image
     if (frameRef.current && frameRef.current.material) {
-      frameRef.current.material.opacity = 0.4 + Math.sin(state.clock.elapsedTime * 8 + index) * 0.2;
+      frameRef.current.material.opacity = (0.4 + Math.sin(state.clock.elapsedTime * 8 + index) * 0.2) * opacity;
     }
   });
 
@@ -273,6 +279,10 @@ export function ProjectsGallery() {
   const glitchBufferRef = useRef(null);
   const hasPlayedEntrySoundRef = useRef(false);
   const scroll = useScroll();
+  const projectsPage = getPortfolioPage('projects');
+  const projectsPageIndex = getPortfolioPageIndex('projects');
+  const pageCount = PORTFOLIO_PAGES.length;
+  const nextPageOffset = getPageOffset(projectsPageIndex + 1, pageCount);
 
   // Tweakable parameters for the arc in the YZ plane
   const radius = 3.6; // Matches the station's ring radius
@@ -294,6 +304,8 @@ export function ProjectsGallery() {
   const rotZ = Math.PI; // Tweak this if the images are sideways or upside down
 
   const [glitchIntensity, setGlitchIntensity] = useState(0);
+  const [opacity, setOpacity] = useState(1);
+  const [currentRadius, setCurrentRadius] = useState(radius);
   const currentRotation = useRef(0);
 
   // Pre-decode audio for zero-latency playback
@@ -352,8 +364,8 @@ export function ProjectsGallery() {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Only navigate if we are mostly scrolled to the projects section
-      if (scroll.offset < 0.6) return;
+      if (scroll.offset > nextPageOffset - 0.02) return;
+      if (scroll.offset < (projectsPage?.timing.keyboardNavigationStart ?? 0.6)) return;
 
       if (e.key === 'ArrowRight') {
         galleryState.index = (galleryState.index + 1) % PROJECTS.length;
@@ -373,16 +385,34 @@ export function ProjectsGallery() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [scroll]);
+  }, [scroll, projectsPage, nextPageOffset]);
 
   useFrame((state, delta) => {
     if (!galleryRef.current) return;
     const offset = scroll.offset;
-    const scaleProgress = THREE.MathUtils.smoothstep(offset, 0.45, 0.8);
-    const glitchProgress = THREE.MathUtils.smoothstep(offset, 0.4, 0.98);
+    const scaleProgress = THREE.MathUtils.smoothstep(offset, projectsPage?.timing.galleryScaleStart ?? 0.45, projectsPage?.timing.galleryScaleEnd ?? 0.8);
+    const glitchProgress = THREE.MathUtils.smoothstep(offset, projectsPage?.timing.galleryGlitchStart ?? 0.4, projectsPage?.timing.galleryGlitchEnd ?? 0.98);
+    const exitFadeDistance = projectsPage?.timing.galleryExitFadeDistance ?? 0.08;
+    const exitStart = nextPageOffset - exitFadeDistance;
+    const isLastPage = projectsPageIndex === pageCount - 1;
+    const exitVisibility = isLastPage
+      ? 1
+      : clamp((nextPageOffset - offset) / Math.max(0.0001, nextPageOffset - exitStart), 0, 1);
 
-    galleryRef.current.scale.setScalar(THREE.MathUtils.lerp(0.001, 1, scaleProgress));
-    galleryRef.current.visible = scaleProgress > 0.01;
+    // Scale in during entrance, and scale out during exit
+    const visibleScale = THREE.MathUtils.lerp(0.001, 1, scaleProgress) * exitVisibility;
+    const nextOpacity = exitVisibility;
+
+    // Move towards the center during exit with ease-in curve
+    const exitProgress = 1 - nextOpacity;
+    const easedExit = Math.pow(exitProgress, 2.5); // Start slow, accelerate
+    const nextRadius = radius - easedExit * radius; // Decrease radius to move "in"
+
+    setOpacity(nextOpacity);
+    setCurrentRadius(nextRadius);
+
+    galleryRef.current.scale.setScalar(visibleScale);
+    galleryRef.current.visible = visibleScale > 0.01 && nextOpacity > 0.01;
 
     // Smoothly update the current rotation (used for the axis pulse or other local effects)
     currentRotation.current = THREE.MathUtils.lerp(currentRotation.current, galleryState.targetRotation, delta * 4);
@@ -390,15 +420,6 @@ export function ProjectsGallery() {
     const intensity = Math.pow(1.0 - glitchProgress, 1.0);
     setGlitchIntensity(intensity);
 
-    // Trigger glitch sound on entry
-    // Threshold 0.5 is when we are transitioning into the projects section
-    if (offset > 0.5 && !hasPlayedEntrySoundRef.current) {
-      playSound(glitchBufferRef.current, 0.1);
-      hasPlayedEntrySoundRef.current = true;
-    } else if (offset < 0.3) {
-      // Reset when scrolling back up so it can fire again
-      hasPlayedEntrySoundRef.current = false;
-    }
   });
 
   return (
@@ -411,11 +432,12 @@ export function ProjectsGallery() {
             url={project.img}
             index={i}
             total={PROJECTS.length}
-            radius={radius}
+            radius={currentRadius}
             startAngle={startAngle}
             endAngle={endAngle}
             xOffset={xOffset}
             glitchIntensity={glitchIntensity}
+            opacity={opacity}
           />
         ))}
       </group>

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './HeaderFrame.css';
-import { scrollState } from '../App';
+import { scrollState } from '../portfolioState';
+import { PORTFOLIO_PAGES } from '../portfolioPageData';
+import { buildHeaderBumpState, getPageFocus, getPageOffset } from '../utils/portfolioTimeline';
 
 const HeaderFrame = () => {
   const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const pathRef = useRef(null);
   const traceRef = useRef(null);
-  const cvPumpRef = useRef(null);
-  const projPumpRef = useRef(null);
+  const pumpRefs = useRef({});
 
   useEffect(() => {
     const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
@@ -21,10 +22,6 @@ const HeaderFrame = () => {
   // Pocket dimensions
   const pW = 450; // width of the main pockets (right)
   const pH = 100; // depth of the main pockets
-  const pW_cv = 160; // width of the CV pocket (middle)
-  const pH_cv = 80;  // depth of the CV pocket
-  const pW_proj = 210; // width of the Projects pocket
-  const pH_proj = 80;
   const r = 50;   // consistent corner radius
 
   // Outer Path (CW)
@@ -35,30 +32,25 @@ const HeaderFrame = () => {
 
     const render = () => {
       const offset = scrollState?.offset || 0;
-      let progress = offset;
+      const pageCount = PORTFOLIO_PAGES.length;
+      const pockets = PORTFOLIO_PAGES.map((page, pageIndex) => {
+        const pageFocus = getPageFocus(offset, pageIndex, pageCount);
+        const pageCenter = getPageOffset(pageIndex, pageCount);
+        const state = buildHeaderBumpState(page.headerBump, offset, w, pageFocus, pageCenter);
 
-      // Calculate pockets
-      let cvScale = 1 - progress;
-      let cvX = w / 2 - progress * (w * 0.22);
-      let cvPillScale = Math.pow(cvScale, 1.5);
-      let cvPocketScale = cvScale;
-      let cvPillWidth = 60 + 70 * cvPillScale;
-      let cvPocketWidth = 80 + 80 * cvPocketScale;
-
-      let projScale = progress;
-      let projX = w / 2 + (1 - progress) * (w * 0.22);
-      let projPillScale = Math.pow(projScale, 1.5);
-      let projPocketScale = projScale;
-      let projPillWidth = 60 + 120 * projPillScale;
-      let projPocketWidth = 80 + 130 * projPocketScale;
-
-      let pockets = [];
-      if (cvScale > 0.01) {
-        pockets.push({ x: cvX, w: cvPocketWidth, d: pH_cv, scale: cvPocketScale, id: 'cv' });
-      }
-      if (projScale > 0.01) {
-        pockets.push({ x: projX, w: projPocketWidth, d: pH_proj, scale: projPocketScale, id: 'proj' });
-      }
+        return {
+          ...page.headerBump,
+          x: state.x,
+          w: state.pocketWidth,
+          d: state.pocketDepth,
+          scale: state.pocketScale,
+          pillScale: state.pillScale,
+          pillWidth: state.pillWidth,
+          opacity: state.opacity,
+          pointerEvents: state.pointerEvents,
+          topOffset: state.topOffset,
+        };
+      }).filter((pocket) => pocket.scale > 0.01);
 
       pockets.sort((a, b) => a.x - b.x);
 
@@ -108,25 +100,26 @@ const HeaderFrame = () => {
       if (pathRef.current) pathRef.current.setAttribute('d', newFramePath);
       if (traceRef.current) traceRef.current.setAttribute('d', newCutout);
 
-      if (cvPumpRef.current) {
-        cvPumpRef.current.style.width = `${cvPillWidth}px`;
-        cvPumpRef.current.style.overflow = 'hidden';
-        cvPumpRef.current.style.left = `${cvX}px`;
-        cvPumpRef.current.style.top = `${(pH_cv * cvPocketScale) / 2 - 20}px`;
-        cvPumpRef.current.style.transform = `translateX(-50%) scale(${cvPillScale})`;
-        cvPumpRef.current.style.opacity = cvPillScale;
-        cvPumpRef.current.style.pointerEvents = cvScale > 0.1 ? 'auto' : 'none';
-      }
+      PORTFOLIO_PAGES.forEach((page) => {
+        const element = pumpRefs.current[page.headerBump.id];
+        if (!element) return;
 
-      if (projPumpRef.current) {
-        projPumpRef.current.style.width = `${projPillWidth}px`;
-        projPumpRef.current.style.overflow = 'hidden';
-        projPumpRef.current.style.left = `${projX}px`;
-        projPumpRef.current.style.top = `${(pH_proj * projPocketScale) / 2 - 20}px`;
-        projPumpRef.current.style.transform = `translateX(-50%) scale(${projPillScale})`;
-        projPumpRef.current.style.opacity = projPillScale;
-        projPumpRef.current.style.pointerEvents = projScale > 0.1 ? 'auto' : 'none';
-      }
+        const pocket = pockets.find(p => p.id === page.headerBump.id);
+        if (pocket) {
+          element.style.width = `${pocket.pillWidth}px`;
+          element.style.overflow = 'hidden';
+          element.style.left = `${pocket.x}px`;
+          element.style.top = `${(pocket.pocketDepth * pocket.scale) / 2 + pocket.topOffset}px`;
+          element.style.transform = `translateX(-50%) scale(${pocket.pillScale})`;
+          element.style.opacity = pocket.opacity;
+          element.style.pointerEvents = pocket.pointerEvents;
+          element.style.display = 'flex';
+        } else {
+          element.style.opacity = 0;
+          element.style.pointerEvents = 'none';
+          element.style.display = 'none';
+        }
+      });
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -134,7 +127,7 @@ const HeaderFrame = () => {
     render();
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [w, h, outer, t, r, pW, pH, pW_cv, pH_cv, pW_proj, pH_proj]);
+  }, [w, h, outer, t, r, pW, pH]);
 
 
   return (
@@ -169,21 +162,27 @@ const HeaderFrame = () => {
       </svg>
 
       <div className="frame-pills">
-        {/* CV Pump */}
-        <a ref={cvPumpRef} href="/cv.pdf" download className="pump cv-pump">
-          <div className="pump-info">
-            <h2 className="pump-name">CV</h2>
-            <p className="pump-label">DOWNLOAD</p>
-          </div>
-        </a>
+        {PORTFOLIO_PAGES.map((page) => {
+          const isLink = page.headerBump.kind === 'link';
+          const PumpTag = isLink ? 'a' : 'div';
 
-        {/* Projects Pump */}
-        <div ref={projPumpRef} className="pump cv-pump projects-pump">
-          <div className="pump-info">
-            <h2 className="pump-name">MY PROJECTS</h2>
-            <p className="pump-label">EXPLORE</p>
-          </div>
-        </div>
+          return (
+            <PumpTag
+              key={page.headerBump.id}
+              ref={(node) => {
+                pumpRefs.current[page.headerBump.id] = node;
+              }}
+              href={isLink ? page.headerBump.href : undefined}
+              download={isLink ? page.headerBump.download : undefined}
+              className={`pump cv-pump ${page.headerBump.id === 'projects' ? 'projects-pump' : ''}`}
+            >
+              <div className="pump-info">
+                <h2 className="pump-name">{page.headerBump.title}</h2>
+                {page.headerBump.label ? <p className="pump-label">{page.headerBump.label}</p> : null}
+              </div>
+            </PumpTag>
+          );
+        })}
 
         {/* Upper Pump */}
         <div className="pump upper-pump">

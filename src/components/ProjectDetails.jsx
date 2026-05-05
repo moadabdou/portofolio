@@ -3,11 +3,17 @@ import { useFrame } from '@react-three/fiber';
 import { useScroll } from '@react-three/drei';
 import gsap from 'gsap';
 import { PROJECTS } from './ProjectsGallery';
-import { galleryState } from '../App';
+import { galleryState } from '../portfolioState';
+import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
+import { clamp, getPageOffset, getPageFocus } from '../utils/portfolioTimeline';
 import './ProjectDetails.css';
 
 export default function ProjectDetails() {
   const scroll = useScroll();
+  const projectsPage = getPortfolioPage('projects');
+  const projectsPageIndex = getPortfolioPageIndex('projects');
+  const pageCount = PORTFOLIO_PAGES.length;
+  const nextPageOffset = getPageOffset(projectsPageIndex + 1, pageCount);
   const containerRef = useRef(null);
   const titleRef = useRef(null);
   const descRef = useRef(null);
@@ -105,12 +111,16 @@ export default function ProjectDetails() {
   useFrame(() => {
     if (!containerRef.current) return;
 
-    // The gallery is on the second page (0.5 to 1.0)
     const rawOffset = scroll.offset;
-    const visibility = Math.min(1, Math.max(0, (rawOffset - 0.6) / 0.1));
+    const focus = getPageFocus(rawOffset, projectsPageIndex, pageCount);
+    const start = projectsPage?.timing.projectDetailsStart ?? 0.3;
+    const fadeDistance = projectsPage?.timing.projectDetailsFadeDistance ?? 0.1;
+    const enterVisibility = clamp((rawOffset - start) / fadeDistance, 0, 1);
+    
+    const visibility = focus * enterVisibility;
 
     containerRef.current.style.opacity = visibility;
-    containerRef.current.style.visibility = visibility <= 0.01 ? 'hidden' : 'visible';
+    containerRef.current.style.visibility = visibility <= 0.001 ? 'hidden' : 'visible';
 
     // Sync with galleryState
     const projectIndex = galleryState.index;

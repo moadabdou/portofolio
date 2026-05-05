@@ -8,15 +8,12 @@ import * as THREE from 'three';
 
 import { SpaceStation } from './components/SpaceStation';
 import { WakeEffect } from './effects/MouseRipple';
-import MoadName from './components/MoadName';
 import HeaderFrame from './components/HeaderFrame';
 import { ProjectsGallery } from './components/ProjectsGallery';
-import ProjectDetails from './components/ProjectDetails';
-import KeyboardHint from './components/KeyboardHint';
-
-export const scrollState = { offset: 0 };
-export const galleryState = { index: 0, targetRotation: 0 };
-
+import { PORTFOLIO_PAGES } from './portfolioPageData';
+import { PORTFOLIO_PAGE_VIEWS } from './portfolioPageViews';
+import { scrollState, galleryState } from './portfolioState';
+import { getInterpolatedPageState } from './utils/portfolioTimeline';
 
 // Wrap the custom Effect class into a React component
 const Wake = wrapEffect(WakeEffect);
@@ -53,17 +50,20 @@ function Scene() {
     const offset = scroll.offset; // 0 to 1
     scrollState.offset = offset;
 
-    if (stationGroupRef.current) {
-      // Move far left and near camera
-      // Initial: [-8, -1, -12]
-      stationGroupRef.current.position.x = THREE.MathUtils.lerp(-8, -10, offset);
-      stationGroupRef.current.position.y = THREE.MathUtils.lerp(-1, 0, offset);
-      stationGroupRef.current.position.z = THREE.MathUtils.lerp(-12, -10, offset);
+    const stationState = getInterpolatedPageState(PORTFOLIO_PAGES, offset, 'station');
 
-      stationGroupRef.current.scale.setScalar(THREE.MathUtils.lerp(2.5, 3.2, offset));
-      stationGroupRef.current.rotation.y = THREE.MathUtils.lerp(-0.5, 0.2, offset);
-      stationGroupRef.current.rotation.x = THREE.MathUtils.lerp(-0.5, 2, offset);
-      stationGroupRef.current.rotation.z = THREE.MathUtils.lerp(-0.5, 0.2, offset);
+    if (stationGroupRef.current) {
+      if (stationState?.position) {
+        stationGroupRef.current.position.set(...stationState.position);
+      }
+
+      if (typeof stationState?.scale === 'number') {
+        stationGroupRef.current.scale.setScalar(stationState.scale);
+      }
+
+      if (stationState?.rotation) {
+        stationGroupRef.current.rotation.set(...stationState.rotation);
+      }
     }
 
     if (sharedRotationRef.current) {
@@ -128,19 +128,16 @@ export default function App() {
         <color attach="background" args={['#0a0b10']} />
 
         <Suspense fallback={null}>
-          <ScrollControls pages={2} damping={0.2}>
+          <ScrollControls pages={PORTFOLIO_PAGE_VIEWS.length} damping={0.2}>
             <Scene />
 
             <Scroll html>
               <div style={{ width: '100vw' }}>
-                <section style={{ height: '100vh', position: 'relative' }}>
-                  <MoadName />
-                </section>
-
-                <section style={{ height: '100vh', position: 'relative' }}>
-                  <ProjectDetails />
-                  <KeyboardHint />
-                </section>
+                {PORTFOLIO_PAGE_VIEWS.map((page) => (
+                  <section key={page.id} style={{ height: '100vh', position: 'relative' }}>
+                    {page.render()}
+                  </section>
+                ))}
               </div>
             </Scroll>
           </ScrollControls>

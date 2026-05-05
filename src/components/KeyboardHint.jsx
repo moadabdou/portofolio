@@ -1,23 +1,31 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useScroll } from '@react-three/drei';
-import * as THREE from 'three';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import './KeyboardHint.css';
+import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
+import { clamp, getPageOffset, getPageFocus } from '../utils/portfolioTimeline';
 
 const KeyboardHint = () => {
   const scroll = useScroll();
   const hintRef = useRef();
+  const projectsPage = getPortfolioPage('projects');
+  const projectsPageIndex = getPortfolioPageIndex('projects');
+  const pageCount = PORTFOLIO_PAGES.length;
+  const nextPageOffset = getPageOffset(projectsPageIndex + 1, pageCount);
 
   useFrame(() => {
     if (!hintRef.current) return;
 
-    // Show hint when page 2 starts (offset > 0.5)
     const offset = scroll.offset;
-    const opacity = Math.min(1, Math.max(0, (offset - 0.5) * 10));
+    const focus = getPageFocus(offset, projectsPageIndex, pageCount);
+    const start = projectsPage?.timing.keyboardHintStart ?? 0.5;
+    const enterOpacity = clamp((offset - start) * 10, 0, 1);
+    
+    const opacity = focus * enterOpacity;
 
     hintRef.current.style.opacity = opacity;
-    hintRef.current.style.visibility = opacity <= 0.01 ? 'hidden' : 'visible';
+    hintRef.current.style.visibility = opacity <= 0.001 ? 'hidden' : 'visible';
 
     // Set static transform
     if (opacity > 0) {
