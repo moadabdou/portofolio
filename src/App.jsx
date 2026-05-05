@@ -5,6 +5,7 @@ import { EffectComposer, Bloom, ChromaticAberration, wrapEffect } from '@react-t
 import { BlendFunction } from 'postprocessing';
 import { Vector2 } from 'three';
 import * as THREE from 'three';
+import gsap from 'gsap';
 
 import { SpaceStation } from './components/SpaceStation';
 import { WakeEffect } from './effects/MouseRipple';
@@ -20,6 +21,86 @@ const Wake = wrapEffect(WakeEffect);
 
 // Normalized mouse position for parallax
 const mouse = { x: 0, y: 0 };
+
+/**
+ * Custom ScrollSnapper to handle magnetic snapping using GSAP.
+ * This provides a much smoother and more precise landing on each page
+ * compared to standard CSS snapping.
+ */
+function ScrollSnapper() {
+  const scroll = useScroll();
+  const timeoutRef = useRef();
+  const lastSnapIndex = useRef(0);
+
+  useEffect(() => {
+    const el = scroll.el;
+    if (!el) return;
+
+    // 1. Sensitivity Reducer: Scale down the scroll speed to make it less "slippery"
+    const handleWheel = (e) => {
+      // Only interfere if we aren't already in a GSAP animation
+      if (gsap.isTweening(el)) return;
+
+      e.preventDefault();
+      // Scale down deltaY to reduce sensitivity (0.4 = 40% of original speed)
+      el.scrollTop += e.deltaY * 0.5;
+    };
+
+    const handleScroll = () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      gsap.killTweensOf(el);
+
+      timeoutRef.current = setTimeout(() => {
+        const pageCount = PORTFOLIO_PAGE_VIEWS.length;
+        if (pageCount <= 1) return;
+
+        const totalScrollableHeight = el.scrollHeight - el.clientHeight;
+        const currentOffset = el.scrollTop / totalScrollableHeight;
+
+        let nearestPageIndex = Math.round(currentOffset * (pageCount - 1));
+
+        // 2. Single-Page Guard: If we are snapping from a stable position, 
+        // prevent jumping more than one page away unless the user really pushed hard.
+        // This makes the navigation feel much more controlled.
+        const diff = nearestPageIndex - lastSnapIndex.current;
+        if (Math.abs(diff) > 1) {
+          nearestPageIndex = lastSnapIndex.current + Math.sign(diff);
+        }
+
+        const targetOffset = nearestPageIndex / (pageCount - 1);
+        const targetScroll = targetOffset * totalScrollableHeight;
+
+        // 3. Proximity Check: Only snap if we are within 100px of the target
+        const distance = Math.abs(el.scrollTop - targetScroll);
+
+        if (distance > 0 && distance < 500) {
+          gsap.to(el, {
+            scrollTop: targetScroll,
+            duration: 0.5,
+            ease: 'power2.out',
+            onComplete: () => {
+              lastSnapIndex.current = nearestPageIndex;
+            },
+            overwrite: true
+          });
+        } else {
+          lastSnapIndex.current = nearestPageIndex;
+        }
+      }, 60);
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    el.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+      el.removeEventListener('scroll', handleScroll);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [scroll]);
+
+  return null;
+}
 
 function Scene() {
   const groupRef = useRef();
@@ -128,7 +209,8 @@ export default function App() {
         <color attach="background" args={['#0a0b10']} />
 
         <Suspense fallback={null}>
-          <ScrollControls pages={PORTFOLIO_PAGE_VIEWS.length} damping={0.2}>
+          <ScrollControls pages={PORTFOLIO_PAGE_VIEWS.length} damping={0.1}>
+            <ScrollSnapper />
             <Scene />
 
             <Scroll html>

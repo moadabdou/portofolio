@@ -85,7 +85,7 @@ export const PORTFOLIO_PAGES = [
       label: '',
       edge: 'left',
       direction: 'inverse',
-      horizontalShift: 0.34,
+      horizontalShift: 0.22,
       pillBaseWidth: 60,
       pillWidthDelta: 150,
       pocketBaseWidth: 80,
