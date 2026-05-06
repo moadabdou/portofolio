@@ -33,7 +33,7 @@ export const PORTFOLIO_PAGES = [
     id: 'projects',
     scene: {
       station: {
-        position: [-8.5, 0.2, -10.5],
+        position: [-9.5, 0.2, -10.5],
         scale: 3.2,
         rotation: [2, 0.2, 0.2],
       },
@@ -70,7 +70,7 @@ export const PORTFOLIO_PAGES = [
     },
   },
   {
-    id: 'testing',
+    id: 'who-am-i',
     scene: {
       station: {
         position: [-8.5, 0.2, -10.5],
@@ -79,9 +79,9 @@ export const PORTFOLIO_PAGES = [
       },
     },
     headerBump: {
-      id: 'testing',
+      id: 'who-am-i',
       kind: 'button',
-      title: 'TESTING PAGE',
+      title: 'WHO AM I',
       label: '',
       edge: 'left',
       direction: 'inverse',
@@ -93,7 +93,12 @@ export const PORTFOLIO_PAGES = [
       pocketDepth: 80,
       topOffset: -20,
     },
-    timing: {},
+    timing: {
+      galleryEntryStart: 0.7,
+      galleryScaleStart: 0.6,
+      galleryScaleEnd: 0.9,
+      galleryExitFadeDistance: 0.1,
+    },
   },
 ];
 

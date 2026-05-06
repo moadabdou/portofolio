@@ -10,6 +10,7 @@ import gsap from 'gsap';
 import { SpaceStation } from './components/SpaceStation';
 import { WakeEffect } from './effects/MouseRipple';
 import HeaderFrame from './components/HeaderFrame';
+import { WhoAmIGallery } from './components/WhoAmIGallery';
 import { ProjectsGallery } from './components/ProjectsGallery';
 import { PORTFOLIO_PAGES } from './portfolioPageData';
 import { PORTFOLIO_PAGE_VIEWS } from './portfolioPageViews';
@@ -177,6 +178,7 @@ function Scene() {
             />
             <ProjectsGallery />
           </group>
+          <WhoAmIGallery />
         </group>
       </group>
     </group>
