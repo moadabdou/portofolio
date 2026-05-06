@@ -6,6 +6,7 @@ import { galleryState } from '../portfolioState';
 import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
 import { clamp, getPageOffset } from '../utils/portfolioTimeline';
 import { GlitchMaterial, GlitchFrameMaterial } from '../materials/GlitchMaterials';
+import { HologramProjector } from './HologramProjector';
 
 extend({ GlitchMaterial, GlitchFrameMaterial });
 
@@ -252,6 +253,7 @@ export function WhoAmIGallery() {
           glitchIntensity={glitchIntensity}
         />
       ))}
+      <HologramProjector />
     </group>
   );
 }

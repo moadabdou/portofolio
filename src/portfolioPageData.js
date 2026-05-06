@@ -73,7 +73,7 @@ export const PORTFOLIO_PAGES = [
     id: 'who-am-i',
     scene: {
       station: {
-        position: [-8.5, 0.2, -10.5],
+        position: [-12.5, 0.2, -14.5],
         scale: 2,
         rotation: [2, 0.2, 0.2],
       },
