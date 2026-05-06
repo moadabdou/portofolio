@@ -105,20 +105,48 @@ export const PORTFOLIO_PAGES = [
 
 export const WHO_AM_I_INFO = {
   "WHO I AM": {
-    title: "ADVISOR LOG: IDENTITY",
-    content: "A creative developer specializing in immersive 3D web experiences. I blend technical precision with cinematic storytelling to build interfaces that feel alive."
+    image: "/who_am_i/1.png",
+    profileTitle: "PROFILE INSIGHT:",
+    details: [
+      "$ NAME: MOAD ABDOU // [SYSTEM_USER]",
+      "$ DESIGNATION: CREATIVE DEVELOPER",
+      "$ LOG_STATUS: ACTIVE & EXPLORING"
+    ],
+    messageTitle: "MESSAGE STREAM:",
+    message: "> INITIALIZING USER INTERACTION PROTOCOL. DATA LOG ACQUIRED. EXPLORE TO ACCESS CORE MEMORIES.<"
   },
   "WHAT I BUILD": {
-    title: "SUBSYSTEMS: CREATION",
-    content: "Advanced React architectures, high-performance GLSL shaders, and interactive 3D environments. My focus is on where engineering meets artistic expression."
+    image: "/who_am_i/2.png",
+    profileTitle: "SYSTEM ARCHITECTURE:",
+    details: [
+      "$ CORE: REACT & THREE.JS",
+      "$ SHADERS: GLSL CUSTOM ENGINE",
+      "$ VIBE: CYBERPUNK CINEMATICS"
+    ],
+    messageTitle: "CONSTRUCTION LOG:",
+    message: "> BUILDING IMMERSIVE DIGITAL WORLDS. FOCUSING ON PERFORMANCE AND VISUAL FIDELITY. SYSTEM STABLE.<"
   },
   "HOW I THINK": {
-    title: "LOGIC: ARCHITECTURE",
-    content: "Code is a medium for art. I prioritize modularity, performance, and clean abstractions, ensuring that complex 3D scenes remain fluid and accessible."
+    image: "/who_am_i/3.png",
+    profileTitle: "LOGIC CORE:",
+    details: [
+      "$ MODE: PROBLEM SOLVING",
+      "$ STYLE: CLEAN & MODULAR",
+      "$ PRIORITY: USER EXPERIENCE"
+    ],
+    messageTitle: "COGNITIVE THREAD:",
+    message: "> CODE IS ART. ARCHITECTING ELEGANT SOLUTIONS TO COMPLEX VISUAL CHALLENGES. PROCESSING...<"
   },
   "WHAT'S NEXT": {
-    title: "FUTURE: OBJECTIVES",
-    content: "Exploring the frontier of WebGPU for desktop-grade web visuals and integrating generative AI into procedural 3D environments."
+    image: "/who_am_i/4.png",
+    profileTitle: "FUTURE OBJECTIVES:",
+    details: [
+      "$ RESEARCH: WEBGPU FRONTIER",
+      "$ EXPANSION: GENERATIVE AI",
+      "$ TARGET: DESKTOP-GRADE WEB"
+    ],
+    messageTitle: "UPCOMING STREAM:",
+    message: "> PUSHING THE BOUNDARIES OF WHAT'S POSSIBLE IN THE BROWSER. THE FUTURE IS REAL-TIME 3D.<"
   }
 };
 

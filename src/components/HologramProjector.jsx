@@ -25,7 +25,16 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
   const data = selectedIndex !== -1 ? WHO_AM_I_INFO[OPTIONS[selectedIndex]] : null;
 
   // Load the custom frame texture
+  // Load all textures
   const frameTex = useTexture('/frame.png');
+  const profileTextures = useTexture({
+    "WHO I AM": "/who_am_i/1.png",
+    "WHAT I BUILD": "/who_am_i/2.png",
+    "HOW I THINK": "/who_am_i/3.png",
+    "WHAT'S NEXT": "/who_am_i/4.png",
+  });
+
+  const currentProfileTex = data ? profileTextures[OPTIONS[selectedIndex]] : null;
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
@@ -49,7 +58,7 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
 
     if (contentRef.current) {
       contentRef.current.position.y = Math.sin(t * 2) * 0.05;
-      
+
       // Enhanced jitter during transition
       const jitterThreshold = 0.98 - transitionGlitch * 0.2;
       if (Math.random() > jitterThreshold) {
@@ -115,7 +124,7 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
         </mesh>
       </group>
 
-      {/* 2. INFO PANEL CONTROL */}
+      {/* 3. INFO PANEL CONTROL */}
       <Billboard
         follow={true}
         lockX={false}
@@ -127,7 +136,7 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
           <group ref={contentRef} rotation={[0.2, -0.4, 0]}>
             {/* Custom Outer Frame with Glitch Effect */}
             <mesh position={[0, -1.5, -0.1]}>
-              <planeGeometry args={[26, 14]} />
+              <planeGeometry args={[32, 16]} />
               <glitchFrameMaterial
                 ref={panelMatRef}
                 uTexture={frameTex}
@@ -139,48 +148,51 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
               />
             </mesh>
 
-            {/* Title */}
-            <Text
-              fontSize={0.8}
-              maxWidth={10}
-              lineHeight={1}
-              textAlign="center"
-              anchorX="center"
-              anchorY="bottom"
-              color="#d400ff"
-              font="/Orbitron-VariableFont_wght.ttf"
-              fillOpacity={opacity}
-            >
-              {data.title}
-            </Text>
+            {/* --- LEFT SIDE: Profile Image --- */}
+            <group position={[-6.4, -0.4, 0.1]}>
+              <mesh>
+                <planeGeometry args={[6, 6]} />
+                <meshBasicMaterial
+                  map={currentProfileTex}
+                  transparent
+                  opacity={0.9 * opacity}
+                />
+              </mesh>
+              {/* Image Frame/Border */}
+              <mesh position={[0, 0, -0.01]}>
+                <planeGeometry args={[6.2, 6.2]} />
+                <meshBasicMaterial color="#ff29f1" transparent opacity={0.3 * opacity} />
+              </mesh>
+            </group>
 
-            {/* Body Content */}
-            <Text
-              position={[0, -1.5, 0]}
-              fontSize={0.4}
-              maxWidth={14}
-              lineHeight={1.4}
-              textAlign="center"
-              anchorX="center"
-              anchorY="top"
-              color="white"
-              font="/Orbitron-VariableFont_wght.ttf"
-              fillOpacity={0.9 * opacity}
-            >
-              {data.content}
-            </Text>
+            {/* --- RIGHT SIDE: Profile Insight --- */}
+            <group position={[-2, 2.8, 0.1]}>
+              <Text
+                fontSize={0.65}
+                anchorX="left"
+                anchorY="top"
+                color="#d400ff"
+                font="/Orbitron-VariableFont_wght.ttf"
+                fillOpacity={opacity}
+              >
+                {data.profileTitle}
+              </Text>
 
-            {/* Subtle background glow behind text */}
-            <mesh position={[0, -1.6, -0.12]}>
-              <planeGeometry args={[17.5, 9.5]} />
-              <meshBasicMaterial
-                color="#a629ff"
-                transparent
-                opacity={0.05 * opacity}
-                blending={THREE.AdditiveBlending}
-                depthWrite={false}
-              />
-            </mesh>
+              {data.details.map((detail, idx) => (
+                <Text
+                  key={idx}
+                  position={[0, -1.0 - idx * 0.8, 0]}
+                  fontSize={0.45}
+                  anchorX="left"
+                  anchorY="top"
+                  color="white"
+                  font="/Orbitron-VariableFont_wght.ttf"
+                  fillOpacity={0.9 * opacity}
+                >
+                  {detail}
+                </Text>
+              ))}
+            </group>
           </group>
         </Float>
       </Billboard>
