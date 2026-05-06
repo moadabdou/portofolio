@@ -246,8 +246,12 @@ export function ProjectsGallery() {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (scroll.offset > nextPageOffset - 0.02) return;
-      if (scroll.offset < (projectsPage?.timing.keyboardNavigationStart ?? 0.6)) return;
+      const offset = scroll.offset;
+      const pageOffset = getRelativeOffset(offset, projectsPageIndex, pageCount);
+      
+      if (offset > nextPageOffset - 0.02) return;
+      // Use pageOffset (0-1) instead of global offset to compare against the timing threshold
+      if (pageOffset < (projectsPage?.timing.keyboardNavigationStart ?? 0.6)) return;
 
       if (e.key === 'ArrowRight') {
         galleryState.index = (galleryState.index + 1) % PROJECTS.length;
@@ -267,7 +271,7 @@ export function ProjectsGallery() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [scroll, projectsPage, nextPageOffset]);
+  }, [scroll, projectsPage, nextPageOffset, projectsPageIndex, pageCount]);
 
   useFrame((state, delta) => {
     if (!galleryRef.current) return;
@@ -300,8 +304,8 @@ export function ProjectsGallery() {
     galleryRef.current.scale.setScalar(visibleScale);
     galleryRef.current.visible = visibleScale > 0.01 && nextOpacity > 0.01;
 
-    // Smoothly update the current rotation (used for the axis pulse or other local effects)
-    currentRotation.current = THREE.MathUtils.lerp(currentRotation.current, galleryState.targetRotation, delta * 4);
+    // We don't rotate galleryRef here because the parent group in App.jsx (sharedRotationRef)
+    // already handles the combined rotation for the SpaceStation and the Gallery.
 
     const intensity = Math.pow(1.0 - glitchProgress, 1.0);
     setGlitchIntensity(intensity);
