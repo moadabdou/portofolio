@@ -102,6 +102,26 @@ export const PORTFOLIO_PAGES = [
   },
 ];
 
+
+export const WHO_AM_I_INFO = {
+  "01_WHO I AM": {
+    title: "ADVISOR LOG: IDENTITY",
+    content: "A creative developer specializing in immersive 3D web experiences. I blend technical precision with cinematic storytelling to build interfaces that feel alive."
+  },
+  "02_WHAT I BUILD": {
+    title: "SUBSYSTEMS: CREATION",
+    content: "Advanced React architectures, high-performance GLSL shaders, and interactive 3D environments. My focus is on where engineering meets artistic expression."
+  },
+  "03_HOW I THINK": {
+    title: "LOGIC: ARCHITECTURE",
+    content: "Code is a medium for art. I prioritize modularity, performance, and clean abstractions, ensuring that complex 3D scenes remain fluid and accessible."
+  },
+  "04_WHAT'S NEXT": {
+    title: "FUTURE: OBJECTIVES",
+    content: "Exploring the frontier of WebGPU for desktop-grade web visuals and integrating generative AI into procedural 3D environments."
+  }
+};
+
 export const PROJECTS_PAGE_ID = 'projects';
 
 export function getPortfolioPage(pageId) {

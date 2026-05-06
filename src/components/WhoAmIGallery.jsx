@@ -253,7 +253,7 @@ export function WhoAmIGallery() {
           glitchIntensity={glitchIntensity}
         />
       ))}
-      <HologramProjector />
+      <HologramProjector selectedIndex={selectedIndex} />
     </group>
   );
 }
