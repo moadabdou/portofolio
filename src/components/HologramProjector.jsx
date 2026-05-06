@@ -1,5 +1,5 @@
 import React, { useRef, useMemo } from 'react';
-import { useGLTF, useScroll, Text, Float, Billboard } from '@react-three/drei';
+import { useGLTF, useScroll, Text, Float, Billboard, useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES, WHO_AM_I_INFO } from '../portfolioPageData';
@@ -14,15 +14,36 @@ const OPTIONS = [
 
 function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
   const beamRef = useRef();
+  const coreRef = useRef();
+  const lightningRef = useRef();
   const contentRef = useRef();
   const data = selectedIndex !== -1 ? WHO_AM_I_INFO[OPTIONS[selectedIndex]] : null;
 
+  // Load the custom frame texture
+  const frameTex = useTexture('/frame.png');
+
   useFrame((state) => {
-    if (beamRef.current) {
-      beamRef.current.opacity = (0.2 + Math.random() * 0.1) * opacity;
+    const t = state.clock.elapsedTime;
+
+    // Core flicker
+    if (coreRef.current) {
+      coreRef.current.opacity = (0.4 + Math.random() * 0.4) * opacity;
     }
+
+    // Outer glow pulse
+    if (beamRef.current) {
+      beamRef.current.opacity = (0.1 + Math.sin(t * 10) * 0.05 + Math.random() * 0.1) * opacity;
+    }
+
+    // Lightning "jitter" effect
+    if (lightningRef.current) {
+      lightningRef.current.scale.x = 1 + (Math.random() - 0.5) * 0.2;
+      lightningRef.current.scale.z = 1 + (Math.random() - 0.5) * 0.2;
+      lightningRef.current.opacity = (Math.random() > 0.8 ? 0.3 : 0.05) * opacity;
+    }
+
     if (contentRef.current) {
-      contentRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.05;
+      contentRef.current.position.y = Math.sin(t * 2) * 0.05;
       if (Math.random() > 0.98) {
         contentRef.current.position.x = (Math.random() - 0.5) * 0.05;
       } else {
@@ -35,21 +56,50 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
 
   return (
     <group position={position} rotation={rotation}>
-      {/* 1. BEAM CONTROL: Shorter (15 units) and starts at y: 0.1 */}
-      <mesh position={[0, 3.7, 0]} rotation={[0, 0, 0]}>
-        <cylinderGeometry args={[3, 0.05, 7, 32, 1, true]} />
-        <meshBasicMaterial
-          ref={beamRef}
-          color="#a629ff"
-          transparent
-          opacity={0.4 * opacity}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
+      {/* 1. ADVANCED BEAM SYSTEM */}
+      <group position={[0, 2.7, 0]}>
+        {/* Core - Central energy */}
+        <mesh>
+          <cylinderGeometry args={[0.2, 0.02, 5, 16, 1, true]} />
+          <meshBasicMaterial 
+            ref={coreRef}
+            color="#ff29f1" 
+            transparent 
+            opacity={0.8 * opacity} 
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
 
-      {/* 2. INFO PANEL CONTROL: Positioned at the tip of the shorter beam */}
+        {/* Outer Glow - Soft volume */}
+        <mesh>
+          <cylinderGeometry args={[3, 0.05, 5, 32, 1, true]} />
+          <meshBasicMaterial 
+            ref={beamRef}
+            color="#d400ff" 
+            transparent 
+            opacity={0.2 * opacity} 
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* Lightning Shell - Electric Jitter */}
+        <mesh ref={lightningRef}>
+          <cylinderGeometry args={[3.2, 0.06, 5.1, 8, 1, true]} />
+          <meshBasicMaterial
+            color="#ffffff"
+            transparent
+            opacity={0.1 * opacity}
+            wireframe
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      </group>
+
+      {/* 2. INFO PANEL CONTROL */}
       <Billboard
         follow={true}
         lockX={false}
@@ -59,6 +109,19 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
       >
         <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
           <group ref={contentRef}>
+            {/* Custom Outer Frame from frame.png */}
+            <mesh position={[0, -0.8, -0.1]}>
+              <planeGeometry args={[16, 9]} />
+              <meshBasicMaterial 
+                map={frameTex}
+                color="#ff29f1" 
+                transparent 
+                opacity={0.8 * opacity} 
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+              />
+            </mesh>
+
             {/* Title */}
             <Text
               fontSize={0.8}
@@ -78,7 +141,7 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
             <Text
               position={[0, -0.5, 0]}
               fontSize={0.4}
-              maxWidth={8}
+              maxWidth={10}
               lineHeight={1.4}
               textAlign="center"
               anchorX="center"
@@ -90,13 +153,13 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
               {data.content}
             </Text>
 
-            {/* Decorative scanlines/frame for the hologram */}
-            <mesh position={[0, -0.8, -0.1]}>
+            {/* Subtle background glow behind text */}
+            <mesh position={[0, -0.8, -0.12]}>
               <planeGeometry args={[11, 6]} />
               <meshBasicMaterial
                 color="#a629ff"
                 transparent
-                opacity={0.1 * opacity}
+                opacity={0.05 * opacity}
                 blending={THREE.AdditiveBlending}
                 depthWrite={false}
               />
