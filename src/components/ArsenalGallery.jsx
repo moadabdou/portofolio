@@ -7,7 +7,8 @@ import {
   Code, Database, Cpu, Layers, Box, Globe, 
   Zap, Shield, Terminal, Monitor, Disc, 
   PenTool, Layout, Wind, Activity, Command,
-  Cloud, Cpu as CpuIcon, Database as DbIcon
+  Cloud, Cpu as CpuIcon, Database as DbIcon,
+  ChevronUp, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
 import { clamp, getRelativeOffset } from '../utils/portfolioTimeline';
@@ -91,11 +92,8 @@ function CurvedText({ text, radius, opacity }) {
     <group>
       {chars.map((char, i) => {
         const totalChars = chars.length;
-        // Reverse order: i goes from 0 (M) to 8 (S). 
-        // We want M to be on the left (positive angle offset) and S on the right (negative angle offset).
         const angleOffset = ((totalChars - 1) / 2 - i) * charSpacing;
         const angle = Math.PI / 2 + angleOffset;
-        
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
         const rotationZ = angle - Math.PI / 2;
@@ -109,7 +107,7 @@ function CurvedText({ text, radius, opacity }) {
             font="/Orbitron-VariableFont_wght.ttf"
             color="#ef4bfb"
             fillOpacity={opacity * 0.8}
-            outlineWidth={0.015} // Adds "thickness" to the font
+            outlineWidth={0.015}
             outlineColor="#ef4bfb"
             outlineOpacity={opacity * 0.4}
             textAlign="center"
@@ -181,6 +179,35 @@ function OrbitalRing({ items, icons, radius, isActive, focusIndex, opacity }) {
           );
         })}
       </group>
+    </group>
+  );
+}
+
+function ControlIndicator({ opacity }) {
+  const gap = 0.3;
+  const iconSize = 0.35; // More prominent
+  
+  return (
+    <group position={[-3.0, -3.2, 0]}>
+      {/* Arrow Icons */}
+      <group position={[0, 0, 0]}>
+        <TechIcon icon={ChevronUp} position={[0, gap, 0]} opacity={opacity * 0.9} size={iconSize} isFocused={true} />
+        <TechIcon icon={ChevronDown} position={[0, -gap, 0]} opacity={opacity * 0.9} size={iconSize} isFocused={true} />
+        <TechIcon icon={ChevronLeft} position={[-gap, 0, 0]} opacity={opacity * 0.9} size={iconSize} isFocused={true} />
+        <TechIcon icon={ChevronRight} position={[gap, 0, 0]} opacity={opacity * 0.9} size={iconSize} isFocused={true} />
+      </group>
+
+      {/* Tiny Text */}
+      <Text
+        position={[0, -0.7, 0]}
+        fontSize={0.09}
+        font="/Orbitron-VariableFont_wght.ttf"
+        color="#ffffff" // White text as requested
+        fillOpacity={opacity * 0.8}
+        letterSpacing={0.2}
+      >
+        USE ARROWS TO NAVIGATE
+      </Text>
     </group>
   );
 }
@@ -292,8 +319,10 @@ export function ArsenalGallery() {
         />
       ))}
 
-      {/* Curved "MY SKILLS" Text */}
       <CurvedText text="MY SKILLS" radius={3.3} opacity={opacity} />
+
+      {/* Navigation Indicator */}
+      <ControlIndicator opacity={opacity} />
 
       <group>
         <mesh>
