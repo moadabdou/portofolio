@@ -178,7 +178,8 @@ export function WhoAmIGallery() {
   const [opacity, setOpacity] = useState(1);
   const [currentRadius, setCurrentRadius] = useState(radius);
   const [glitchIntensity, setGlitchIntensity] = useState(0);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [transitionGlitch, setTransitionGlitch] = useState(0);
 
   useFrame((state, delta) => {
     if (!galleryRef.current) return;
@@ -235,6 +236,13 @@ export function WhoAmIGallery() {
       ? 0.8 + Math.random() * 0.2
       : Math.pow(1.0 - entranceProgress, 2.0);
     setGlitchIntensity(intensity);
+
+    // Transition glitch decay
+    if (transitionGlitch > 0.01) {
+      setTransitionGlitch(THREE.MathUtils.lerp(transitionGlitch, 0, delta * 10));
+    } else if (transitionGlitch !== 0) {
+      setTransitionGlitch(0);
+    }
   });
 
   return (
@@ -249,11 +257,16 @@ export function WhoAmIGallery() {
           xOffset={xOffset}
           opacity={opacity}
           isSelected={selectedIndex === i}
-          onSelect={() => setSelectedIndex(i === selectedIndex ? -1 : i)}
+          onSelect={() => {
+            if (selectedIndex !== i) {
+              setSelectedIndex(i);
+              setTransitionGlitch(1.0);
+            }
+          }}
           glitchIntensity={glitchIntensity}
         />
       ))}
-      <HologramProjector selectedIndex={selectedIndex} />
+      <HologramProjector selectedIndex={selectedIndex} transitionGlitch={transitionGlitch} />
     </group>
   );
 }

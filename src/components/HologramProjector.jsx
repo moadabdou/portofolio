@@ -4,6 +4,10 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES, WHO_AM_I_INFO } from '../portfolioPageData';
 import { clamp, getPageOffset } from '../utils/portfolioTimeline';
+import { GlitchFrameMaterial } from '../materials/GlitchMaterials';
+import { extend } from '@react-three/fiber';
+
+extend({ GlitchFrameMaterial });
 
 const OPTIONS = [
   "WHO I AM",
@@ -12,11 +16,12 @@ const OPTIONS = [
   "WHAT'S NEXT"
 ];
 
-function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
+function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionGlitch = 0 }) {
   const beamRef = useRef();
   const coreRef = useRef();
   const lightningRef = useRef();
   const contentRef = useRef();
+  const panelMatRef = useRef();
   const data = selectedIndex !== -1 ? WHO_AM_I_INFO[OPTIONS[selectedIndex]] : null;
 
   // Load the custom frame texture
@@ -44,11 +49,22 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
 
     if (contentRef.current) {
       contentRef.current.position.y = Math.sin(t * 2) * 0.05;
-      if (Math.random() > 0.98) {
-        contentRef.current.position.x = (Math.random() - 0.5) * 0.05;
+      
+      // Enhanced jitter during transition
+      const jitterThreshold = 0.98 - transitionGlitch * 0.2;
+      if (Math.random() > jitterThreshold) {
+        contentRef.current.position.x = (Math.random() - 0.5) * (0.05 + transitionGlitch * 0.5);
+        contentRef.current.position.z = (Math.random() - 0.5) * (transitionGlitch * 0.2);
       } else {
         contentRef.current.position.x = 0;
+        contentRef.current.position.z = 0;
       }
+    }
+
+    if (panelMatRef.current) {
+      panelMatRef.current.uTime = t;
+      panelMatRef.current.uGlitchIntensity = 0.05 + transitionGlitch * 0.8 + (Math.random() > 0.95 ? 0.2 : 0);
+      panelMatRef.current.uOpacity = 0.8 * opacity;
     }
   });
 
@@ -109,14 +125,15 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
       >
         <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
           <group ref={contentRef} rotation={[0.2, -0.4, 0]}>
-            {/* Custom Outer Frame from frame.png */}
+            {/* Custom Outer Frame with Glitch Effect */}
             <mesh position={[0, -1.5, -0.1]}>
               <planeGeometry args={[26, 14]} />
-              <meshBasicMaterial
-                map={frameTex}
-                color="#ff29f1"
+              <glitchFrameMaterial
+                ref={panelMatRef}
+                uTexture={frameTex}
+                uColor={new THREE.Color("#ff29f1")}
                 transparent
-                opacity={0.8 * opacity}
+                uOpacity={0.8 * opacity}
                 blending={THREE.AdditiveBlending}
                 depthWrite={false}
               />
@@ -171,7 +188,7 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
   );
 }
 
-export function HologramProjector({ selectedIndex }) {
+export function HologramProjector({ selectedIndex, transitionGlitch }) {
   const groupRef = useRef();
   const robotRef = useRef();
   const [currentPosition, setCurrentPosition] = React.useState([0, 0, 0]);
@@ -235,13 +252,13 @@ export function HologramProjector({ selectedIndex }) {
     const entranceEnd = page?.timing.galleryScaleEnd ?? 0.9;
     const entranceProgress = clamp((offset - entranceStart) / (entranceEnd - entranceStart), 0, 1);
 
-    // Exit logic
-    const exitFadeDistance = page?.timing.galleryExitFadeDistance ?? 0.15;
+    // Exit logic: Sharper exit
+    const exitFadeDistance = 0.05; // Shorter distance for "exact" feel
     const exitStart = nextPageOffset - exitFadeDistance;
     const isLastPage = pageIndex === pageCount - 1;
     const exitVisibility = isLastPage
       ? 1
-      : clamp((nextPageOffset - offset) / Math.max(0.0001, nextPageOffset - exitStart), 0, 1);
+      : clamp((nextPageOffset - offset) / 0.01, 0, 1); // Use very small divisor for sharp cutoff
 
     // 1. Entrance: Move into frame from the right (x: 10 -> x: 4.5)
     const targetX = -20;
@@ -302,6 +319,7 @@ export function HologramProjector({ selectedIndex }) {
         opacity={projectionOpacity}
         position={currentPosition}
         rotation={[3.5, 0, 0]} // Matching the robot's tilt
+        transitionGlitch={transitionGlitch}
       />
     </>
   );
