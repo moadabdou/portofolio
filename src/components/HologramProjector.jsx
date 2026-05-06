@@ -6,10 +6,10 @@ import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES, WHO_AM_I_INFO
 import { clamp, getPageOffset } from '../utils/portfolioTimeline';
 
 const OPTIONS = [
-  "01_WHO I AM",
-  "02_WHAT I BUILD",
-  "03_HOW I THINK",
-  "04_WHAT'S NEXT"
+  "WHO I AM",
+  "WHAT I BUILD",
+  "HOW I THINK",
+  "WHAT'S NEXT"
 ];
 
 function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
@@ -61,11 +61,11 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
         {/* Core - Central energy */}
         <mesh>
           <cylinderGeometry args={[0.2, 0.02, 5, 16, 1, true]} />
-          <meshBasicMaterial 
+          <meshBasicMaterial
             ref={coreRef}
-            color="#ff29f1" 
-            transparent 
-            opacity={0.8 * opacity} 
+            color="#ff29f1"
+            transparent
+            opacity={0.8 * opacity}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
           />
@@ -74,11 +74,11 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
         {/* Outer Glow - Soft volume */}
         <mesh>
           <cylinderGeometry args={[3, 0.05, 5, 32, 1, true]} />
-          <meshBasicMaterial 
+          <meshBasicMaterial
             ref={beamRef}
-            color="#d400ff" 
-            transparent 
-            opacity={0.2 * opacity} 
+            color="#d400ff"
+            transparent
+            opacity={0.2 * opacity}
             side={THREE.DoubleSide}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
@@ -105,18 +105,18 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
         lockX={false}
         lockY={false}
         lockZ={false}
-        position={[0, 13.2, 0]}
+        position={[0, 12, 0]}
       >
         <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-          <group ref={contentRef}>
+          <group ref={contentRef} rotation={[0.2, -0.4, 0]}>
             {/* Custom Outer Frame from frame.png */}
-            <mesh position={[0, -0.8, -0.1]}>
-              <planeGeometry args={[16, 9]} />
-              <meshBasicMaterial 
+            <mesh position={[0, -1.5, -0.1]}>
+              <planeGeometry args={[26, 14]} />
+              <meshBasicMaterial
                 map={frameTex}
-                color="#ff29f1" 
-                transparent 
-                opacity={0.8 * opacity} 
+                color="#ff29f1"
+                transparent
+                opacity={0.8 * opacity}
                 blending={THREE.AdditiveBlending}
                 depthWrite={false}
               />
@@ -139,9 +139,9 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
 
             {/* Body Content */}
             <Text
-              position={[0, -0.5, 0]}
+              position={[0, -1.5, 0]}
               fontSize={0.4}
-              maxWidth={10}
+              maxWidth={14}
               lineHeight={1.4}
               textAlign="center"
               anchorX="center"
@@ -154,8 +154,8 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation }) {
             </Text>
 
             {/* Subtle background glow behind text */}
-            <mesh position={[0, -0.8, -0.12]}>
-              <planeGeometry args={[11, 6]} />
+            <mesh position={[0, -1.6, -0.12]}>
+              <planeGeometry args={[17.5, 9.5]} />
               <meshBasicMaterial
                 color="#a629ff"
                 transparent

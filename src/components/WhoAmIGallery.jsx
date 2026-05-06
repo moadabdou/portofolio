@@ -11,10 +11,10 @@ import { HologramProjector } from './HologramProjector';
 extend({ GlitchMaterial, GlitchFrameMaterial });
 
 const OPTIONS = [
-  "01_WHO I AM",
-  "02_WHAT I BUILD",
-  "03_HOW I THINK",
-  "04_WHAT'S NEXT"
+  "WHO I AM",
+  "WHAT I BUILD",
+  "HOW I THINK",
+  "WHAT'S NEXT"
 ];
 
 function OptionButton({ text, index, total, radius, xOffset, opacity, isSelected, onSelect, glitchIntensity }) {
