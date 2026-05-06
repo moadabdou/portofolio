@@ -157,7 +157,8 @@ function Scene() {
   });
 
   return (
-    <group ref={groupRef}>
+    <>
+      <group ref={groupRef}>
       <Environment preset="city" />
 
       <ambientLight intensity={0.3} />
@@ -183,7 +184,8 @@ function Scene() {
         </group>
       </group>
       <ArsenalGallery />
-    </group>
+      </group>
+    </>
   );
 }
 
@@ -208,7 +210,7 @@ export default function App() {
 
       <Canvas
         camera={{ position: [0, 0, 10], fov: 50 }}
-        gl={{ powerPreference: "high-performance", antialias: false }}
+        gl={{ powerPreference: "high-performance", antialias: true }}
       >
         <color attach="background" args={['#0a0b10']} />
 
@@ -229,12 +231,10 @@ export default function App() {
           </ScrollControls>
 
           <EffectComposer disableNormalPass>
-            <Bloom luminanceThreshold={0.9} luminanceSmoothing={0.9} height={300} intensity={1.5} mipmapBlur />
+            <Bloom luminanceThreshold={0.9} luminanceSmoothing={0.9} height={300} intensity={1.0} mipmapBlur />
             <ChromaticAberration
               blendFunction={BlendFunction.NORMAL}
-              offset={new Vector2(0.002, 0.002)}
-              radialModulation
-              modulationOffset={0.4}
+              offset={new Vector2(0.001, 0.001)}
             />
             {/* Directional water-wake effect — V-shaped waves trailing behind the cursor */}
             <Wake ref={rippleRef} />
