@@ -15,6 +15,7 @@ const PORTFOLIO_PAGE_RENDERERS = {
     </>
   ),
   'who-am-i': () => null,
+  'arsenal': () => <div style={{ color: 'white', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '3rem', fontFamily: 'Orbitron' }}>ARSENAL COMING SOON</div>,
 };
 
 export const PORTFOLIO_PAGE_VIEWS = PORTFOLIO_PAGES.map((page) => ({

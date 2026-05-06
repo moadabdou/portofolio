@@ -4,7 +4,7 @@ import { useFrame, extend } from '@react-three/fiber';
 import * as THREE from 'three';
 import { galleryState } from '../portfolioState';
 import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
-import { clamp, getPageOffset } from '../utils/portfolioTimeline';
+import { clamp, getPageOffset, getRelativeOffset } from '../utils/portfolioTimeline';
 
 import { GlitchMaterial, GlitchFrameMaterial } from '../materials/GlitchMaterials';
 
@@ -272,14 +272,18 @@ export function ProjectsGallery() {
   useFrame((state, delta) => {
     if (!galleryRef.current) return;
     const offset = scroll.offset;
-    const scaleProgress = THREE.MathUtils.smoothstep(offset, projectsPage?.timing.galleryScaleStart ?? 0.45, projectsPage?.timing.galleryScaleEnd ?? 0.8);
-    const glitchProgress = THREE.MathUtils.smoothstep(offset, projectsPage?.timing.galleryGlitchStart ?? 0.4, projectsPage?.timing.galleryGlitchEnd ?? 0.98);
-    const exitFadeDistance = projectsPage?.timing.galleryExitFadeDistance ?? 0.08;
-    const exitStart = nextPageOffset - exitFadeDistance;
+    const pageOffset = getRelativeOffset(offset, projectsPageIndex, pageCount);
+
+    const scaleProgress = THREE.MathUtils.smoothstep(pageOffset, projectsPage?.timing.galleryScaleStart ?? 0.3, projectsPage?.timing.galleryScaleEnd ?? 0.5);
+    const glitchProgress = THREE.MathUtils.smoothstep(pageOffset, projectsPage?.timing.galleryGlitchStart ?? 0.3, projectsPage?.timing.galleryGlitchEnd ?? 0.5);
+    
+    // Exit logic: fade out as we approach the end of the page range (relative offset 1.0)
+    const exitFadeDistance = projectsPage?.timing.galleryExitFadeDistance ?? 0.3;
+    const exitStart = 1.0 - exitFadeDistance;
     const isLastPage = projectsPageIndex === pageCount - 1;
     const exitVisibility = isLastPage
       ? 1
-      : clamp((nextPageOffset - offset) / Math.max(0.0001, nextPageOffset - exitStart), 0, 1);
+      : clamp((1.0 - pageOffset) / exitFadeDistance, 0, 1);
 
     // Scale in during entrance, and scale out during exit
     const visibleScale = THREE.MathUtils.lerp(0.001, 1, scaleProgress) * exitVisibility;

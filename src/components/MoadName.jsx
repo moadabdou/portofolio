@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useScroll } from '@react-three/drei';
 import gsap from 'gsap';
+import { getRelativeOffset, clamp } from '../utils/portfolioTimeline';
+import { PORTFOLIO_PAGES } from '../portfolioPageData';
 import './MoadName.css';
 
 export default function MoadName() {
@@ -13,8 +15,13 @@ export default function MoadName() {
 
   useFrame(() => {
     if (containerRef.current) {
-      // Fade out from scroll 0 to 0.4
-      const opacity = 1 - scroll.range(0, 0.4);
+      const pageOffset = getRelativeOffset(scroll.offset, 0, PORTFOLIO_PAGES.length);
+      // For the first page, pageOffset 0.5 is the center (scroll 0).
+      // We fade out as we move from 0.5 towards 1.0.
+      const fadeStart = 0.5;
+      const fadeEnd = 0.8;
+      const opacity = 1 - clamp((pageOffset - fadeStart) / (fadeEnd - fadeStart), 0, 1);
+      
       containerRef.current.style.opacity = opacity;
       containerRef.current.style.visibility = opacity <= 0.01 ? 'hidden' : 'visible';
       

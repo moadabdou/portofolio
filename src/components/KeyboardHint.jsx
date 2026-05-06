@@ -4,7 +4,7 @@ import { useScroll } from '@react-three/drei';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import './KeyboardHint.css';
 import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
-import { clamp, getPageOffset, getPageFocus } from '../utils/portfolioTimeline';
+import { clamp, getPageOffset, getPageFocus, getRelativeOffset } from '../utils/portfolioTimeline';
 
 const KeyboardHint = () => {
   const scroll = useScroll();
@@ -18,9 +18,10 @@ const KeyboardHint = () => {
     if (!hintRef.current) return;
 
     const offset = scroll.offset;
+    const pageOffset = getRelativeOffset(offset, projectsPageIndex, pageCount);
     const focus = getPageFocus(offset, projectsPageIndex, pageCount);
-    const start = projectsPage?.timing.keyboardHintStart ?? 0.5;
-    const enterOpacity = clamp((offset - start) * 10, 0, 1);
+    const start = projectsPage?.timing.keyboardHintStart ?? 0.0;
+    const enterOpacity = clamp((pageOffset - start) * 10, 0, 1);
     
     const opacity = focus * enterOpacity;
 

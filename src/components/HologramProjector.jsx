@@ -3,7 +3,7 @@ import { useGLTF, useScroll, Text, Float, Billboard, useTexture } from '@react-t
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES, WHO_AM_I_INFO } from '../portfolioPageData';
-import { clamp, getPageOffset } from '../utils/portfolioTimeline';
+import { clamp, getPageOffset, getRelativeOffset } from '../utils/portfolioTimeline';
 import { GlitchFrameMaterial } from '../materials/GlitchMaterials';
 import { extend } from '@react-three/fiber';
 
@@ -318,19 +318,19 @@ export function HologramProjector({ selectedIndex, transitionGlitch }) {
     if (!groupRef.current) return;
 
     const offset = scroll.offset;
+    const pageOffset = getRelativeOffset(offset, pageIndex, pageCount);
 
     // Entrance logic (aligned with WhoAmIGallery timing)
-    const entranceStart = page?.timing.galleryScaleStart ?? 0.6;
-    const entranceEnd = page?.timing.galleryScaleEnd ?? 0.9;
-    const entranceProgress = clamp((offset - entranceStart) / (entranceEnd - entranceStart), 0, 1);
+    const entranceStart = page?.timing.galleryScaleStart ?? 0.25;
+    const entranceEnd = page?.timing.galleryScaleEnd ?? 0.5;
+    const entranceProgress = clamp((pageOffset - entranceStart) / (entranceEnd - entranceStart), 0, 1);
 
-    // Exit logic: Sharper exit
-    const exitFadeDistance = 0.05; // Shorter distance for "exact" feel
-    const exitStart = nextPageOffset - exitFadeDistance;
+    // Exit logic: fade out as we approach the end of the page range (relative offset 1.0)
+    const exitFadeDistance = page?.timing.galleryExitFadeDistance ?? 0.2;
     const isLastPage = pageIndex === pageCount - 1;
     const exitVisibility = isLastPage
       ? 1
-      : clamp((nextPageOffset - offset) / 0.01, 0, 1); // Use very small divisor for sharp cutoff
+      : clamp((1.0 - pageOffset) / exitFadeDistance, 0, 1);
 
     // 1. Entrance: Move into frame from the right (x: 10 -> x: 4.5)
     const targetX = -20;

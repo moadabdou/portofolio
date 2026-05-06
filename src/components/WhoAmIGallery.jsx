@@ -4,7 +4,7 @@ import { useFrame, extend } from '@react-three/fiber';
 import * as THREE from 'three';
 import { galleryState } from '../portfolioState';
 import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
-import { clamp, getPageOffset } from '../utils/portfolioTimeline';
+import { clamp, getPageOffset, getRelativeOffset } from '../utils/portfolioTimeline';
 import { GlitchMaterial, GlitchFrameMaterial } from '../materials/GlitchMaterials';
 import { HologramProjector } from './HologramProjector';
 
@@ -213,25 +213,25 @@ export function WhoAmIGallery() {
   useFrame((state, delta) => {
     if (!galleryRef.current) return;
     const offset = scroll.offset;
+    const pageOffset = getRelativeOffset(offset, pageIndex, pageCount);
 
     // Glitchy Entrance Logic
-    const entranceStart = page?.timing.galleryScaleStart ?? 0.6;
-    const entranceEnd = page?.timing.galleryScaleEnd ?? 0.9;
+    const entranceStart = page?.timing.galleryScaleStart ?? 0.0;
+    const entranceEnd = page?.timing.galleryScaleEnd ?? 0.48;
 
     // progress goes from 0 to 1 during entrance
-    const entranceProgress = clamp((offset - entranceStart) / (entranceEnd - entranceStart), 0, 1);
+    const entranceProgress = clamp((pageOffset - entranceStart) / (entranceEnd - entranceStart), 0, 1);
 
-    // Exit logic
-    const exitFadeDistance = page?.timing.galleryExitFadeDistance ?? 0.15;
-    const exitStart = nextPageOffset - exitFadeDistance;
+    // Exit logic: fade out as we approach the end of the page range (relative offset 1.0)
+    const exitFadeDistance = page?.timing.galleryExitFadeDistance ?? 0.2;
     const isLastPage = pageIndex === pageCount - 1;
     const exitVisibility = isLastPage
       ? 1
-      : clamp((nextPageOffset - offset) / Math.max(0.0001, nextPageOffset - exitStart), 0, 1);
+      : clamp((1.0 - pageOffset) / exitFadeDistance, 0, 1);
 
-    // Stutter/Flicker effect during entrance
+    // Stutter/Flicker effect during entrance (finishes at 90% progress)
     let stutter = 1;
-    if (entranceProgress > 0 && entranceProgress < 1) {
+    if (entranceProgress > 0 && entranceProgress < 0.9) {
       // Randomly hide or show based on progress to create flickering
       if (Math.random() > entranceProgress * 1.5) {
         stutter = 0;
@@ -244,8 +244,8 @@ export function WhoAmIGallery() {
 
     const nextOpacity = exitVisibility * (entranceProgress > 0.01 ? 1 : 0) * stutter;
 
-    // Scale is either 0 or 1 (with a tiny bit of jitter when glitching)
-    const jitter = (entranceProgress > 0 && entranceProgress < 1 && Math.random() > 0.8) ? (1 + (Math.random() - 0.5) * 0.1) : 1;
+    // Scale is either 0 or 1 (with a tiny bit of jitter when glitching, finishes at 90%)
+    const jitter = (entranceProgress > 0 && entranceProgress < 0.9 && Math.random() > 0.8) ? (1 + (Math.random() - 0.5) * 0.1) : 1;
     const visibleScale = (entranceProgress > 0.05 ? 1 : 0.001) * exitVisibility * jitter;
 
     const exitProgress = 1 - exitVisibility;
@@ -260,9 +260,9 @@ export function WhoAmIGallery() {
     }
     galleryRef.current.visible = visibleScale > 0.001 && nextOpacity > 0.01;
 
-    // Glitch intensity - very high during entrance stutter
+    // Glitch intensity - fades out as we approach the final state (entranceProgress = 1)
     const intensity = (entranceProgress > 0 && entranceProgress < 1)
-      ? 0.8 + Math.random() * 0.2
+      ? (0.8 + Math.random() * 0.2) * (1.0 - entranceProgress)
       : Math.pow(1.0 - entranceProgress, 2.0);
     setGlitchIntensity(intensity);
 

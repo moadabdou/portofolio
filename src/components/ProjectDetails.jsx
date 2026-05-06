@@ -5,7 +5,7 @@ import gsap from 'gsap';
 import { PROJECTS } from './ProjectsGallery';
 import { galleryState } from '../portfolioState';
 import { getPortfolioPage, getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
-import { clamp, getPageOffset, getPageFocus } from '../utils/portfolioTimeline';
+import { clamp, getPageOffset, getPageFocus, getRelativeOffset } from '../utils/portfolioTimeline';
 import './ProjectDetails.css';
 
 export default function ProjectDetails() {
@@ -112,10 +112,12 @@ export default function ProjectDetails() {
     if (!containerRef.current) return;
 
     const rawOffset = scroll.offset;
+    const pageOffset = getRelativeOffset(rawOffset, projectsPageIndex, pageCount);
     const focus = getPageFocus(rawOffset, projectsPageIndex, pageCount);
-    const start = projectsPage?.timing.projectDetailsStart ?? 0.3;
-    const fadeDistance = projectsPage?.timing.projectDetailsFadeDistance ?? 0.1;
-    const enterVisibility = clamp((rawOffset - start) / fadeDistance, 0, 1);
+    
+    const start = projectsPage?.timing.projectDetailsStart ?? 0.1;
+    const fadeDistance = projectsPage?.timing.projectDetailsFadeDistance ?? 0.2;
+    const enterVisibility = clamp((pageOffset - start) / fadeDistance, 0, 1);
     
     const visibility = focus * enterVisibility;
 

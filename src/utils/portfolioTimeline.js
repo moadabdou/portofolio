@@ -66,6 +66,36 @@ export function getPageFocus(offset, pageIndex, pageCount) {
   return clamp(1 - distance / (step * 0.6), 0, 1);
 }
 
+/**
+ * Returns the global scroll range for a specific page.
+ * @param {number} pageIndex 
+ * @param {number} pageCount 
+ * @returns {{start: number, end: number, center: number}}
+ */
+export function getPageRange(pageIndex, pageCount) {
+  if (pageCount <= 1) return { start: 0, end: 1, center: 0 };
+  const step = 1 / (pageCount - 1);
+  const center = pageIndex * step;
+  // A page is "active" from the previous page center to the next page center
+  return {
+    start: center - step,
+    end: center + step,
+    center
+  };
+}
+
+/**
+ * Converts a global scroll offset into a 0-1 value relative to a specific page's range.
+ * @param {number} globalOffset 
+ * @param {number} pageIndex 
+ * @param {number} pageCount 
+ * @returns {number}
+ */
+export function getRelativeOffset(globalOffset, pageIndex, pageCount) {
+  const { start, end } = getPageRange(pageIndex, pageCount);
+  return clamp((globalOffset - start) / (end - start), 0, 1);
+}
+
 export function buildHeaderBumpState(bump, offset, viewportWidth, visibilityFactor = 1, pageCenter = 0) {
   const visible = clamp(visibilityFactor, 0, 1);
   
