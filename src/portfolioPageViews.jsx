@@ -2,6 +2,7 @@ import React from 'react';
 
 import MoadName from './components/MoadName';
 import ProjectDetails from './components/ProjectDetails';
+import ArsenalDetails from './components/ArsenalDetails';
 import KeyboardHint from './components/KeyboardHint';
 import { WhoAmIGallery } from './components/WhoAmIGallery';
 import { PORTFOLIO_PAGES } from './portfolioPageData';
@@ -15,7 +16,7 @@ const PORTFOLIO_PAGE_RENDERERS = {
     </>
   ),
   'who-am-i': () => null,
-  'arsenal': () => <div style={{ color: 'white', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '3rem', fontFamily: 'Orbitron' }}></div>,
+  'arsenal': () => <ArsenalDetails />,
 };
 
 export const PORTFOLIO_PAGE_VIEWS = PORTFOLIO_PAGES.map((page) => ({

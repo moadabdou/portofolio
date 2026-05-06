@@ -4,14 +4,15 @@ import { Text, useScroll, Float } from '@react-three/drei';
 import * as THREE from 'three';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { 
-  Code, Database, Cpu, Layers, Box, Globe, 
-  Zap, Shield, Terminal, Monitor, Disc, 
+  Zap, Box, Terminal, Monitor, Disc, 
   PenTool, Layout, Wind, Activity, Command,
   Cloud, Cpu as CpuIcon, Database as DbIcon,
-  ChevronUp, ChevronDown, ChevronLeft, ChevronRight
+  Globe, ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
+  Layers, Shield
 } from 'lucide-react';
 import { getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
 import { clamp, getRelativeOffset } from '../utils/portfolioTimeline';
+import { arsenalState } from '../portfolioState';
 
 const FOUNDATION_ICONS = [Zap, Box, CpuIcon, Layers, Shield];
 const TOOLS_ICONS = [Terminal, Monitor, Disc, PenTool, Layout, Wind];
@@ -185,11 +186,10 @@ function OrbitalRing({ items, icons, radius, isActive, focusIndex, opacity }) {
 
 function ControlIndicator({ opacity }) {
   const gap = 0.3;
-  const iconSize = 0.35; // More prominent
+  const iconSize = 0.35; 
   
   return (
-    <group position={[-3.0, -3.2, 0]}>
-      {/* Arrow Icons */}
+    <group position={[-2.4, -3.2, 0]}>
       <group position={[0, 0, 0]}>
         <TechIcon icon={ChevronUp} position={[0, gap, 0]} opacity={opacity * 0.9} size={iconSize} isFocused={true} />
         <TechIcon icon={ChevronDown} position={[0, -gap, 0]} opacity={opacity * 0.9} size={iconSize} isFocused={true} />
@@ -197,12 +197,11 @@ function ControlIndicator({ opacity }) {
         <TechIcon icon={ChevronRight} position={[gap, 0, 0]} opacity={opacity * 0.9} size={iconSize} isFocused={true} />
       </group>
 
-      {/* Tiny Text */}
       <Text
         position={[0, -0.7, 0]}
         fontSize={0.09}
         font="/Orbitron-VariableFont_wght.ttf"
-        color="#ffffff" // White text as requested
+        color="#ffffff"
         fillOpacity={opacity * 0.8}
         letterSpacing={0.2}
       >
@@ -222,6 +221,18 @@ export function ArsenalGallery() {
   const [focusIndices, setFocusIndices] = useState(ARSENAL_DATA.map(() => 0));
   const [opacity, setOpacity] = useState(0);
   const [transitionGlitch, setTransitionGlitch] = useState(0);
+  const clickSoundRef = useRef(null);
+
+  useEffect(() => {
+    clickSoundRef.current = new Audio('/audio/click.mp3');
+    clickSoundRef.current.volume = 0.2;
+  }, []);
+
+  // Sync selection to arsenalState for the 2D overlay
+  useEffect(() => {
+    arsenalState.activeLevel = activeLevel;
+    arsenalState.focusIndices = focusIndices;
+  }, [activeLevel, focusIndices]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -231,6 +242,11 @@ export function ArsenalGallery() {
 
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
+        // Play click sound
+        if (clickSoundRef.current) {
+          clickSoundRef.current.currentTime = 0;
+          clickSoundRef.current.play().catch(() => {});
+        }
       }
 
       const triggerGlitch = () => setTransitionGlitch(1.0);
@@ -302,8 +318,9 @@ export function ArsenalGallery() {
     groupRef.current.rotation.y = -0.4;
   });
 
-  const focusedIcon = ARSENAL_DATA[activeLevel].icons[focusIndices[activeLevel] % ARSENAL_DATA[activeLevel].icons.length];
-  const focusedItem = ARSENAL_DATA[activeLevel].items[focusIndices[activeLevel]];
+  const focusedData = ARSENAL_DATA[activeLevel];
+  const focusedIcon = focusedData.icons[focusIndices[activeLevel] % focusedData.icons.length];
+  const focusedItem = focusedData.items[focusIndices[activeLevel]];
 
   return (
     <group ref={groupRef} position={[4, 0, 0]}>
@@ -321,7 +338,6 @@ export function ArsenalGallery() {
 
       <CurvedText text="MY SKILLS" radius={3.3} opacity={opacity} />
 
-      {/* Navigation Indicator */}
       <ControlIndicator opacity={opacity} />
 
       <group>

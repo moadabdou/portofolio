@@ -1,0 +1,105 @@
+.arsenal-details-container {
+  position: absolute;
+  bottom: 8%;
+  left: 5%;
+  z-index: 1000;
+  pointer-events: none;
+  width: 450px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.arsenal-details-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: 'Share Tech Mono', monospace;
+  color: #ffffff;
+  text-align: left;
+}
+
+.arsenal-label {
+  font-size: 0.8rem;
+  color: #cf00f3;
+  letter-spacing: 0.3em;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+}
+
+.arsenal-title {
+  font-family: 'BigsRobotic', sans-serif;
+  font-size: 3rem;
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 0 15px rgba(207, 0, 243, 0.6);
+  letter-spacing: 0.1em;
+  line-height: 1;
+  position: relative;
+}
+
+.arsenal-description {
+  margin-top: 1.5rem;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  max-width: 420px;
+  opacity: 0.85;
+  color: #e0e0e0;
+  letter-spacing: 0.02em;
+  position: relative;
+}
+
+/* Glitch layers for description reveal */
+.arsenal-description::before,
+.arsenal-description::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.update-glitch .arsenal-description {
+  animation: description-reveal 0.8s steps(1);
+}
+
+@keyframes description-reveal {
+  0% { opacity: 0; transform: translateX(10px); }
+  5% { opacity: 1; transform: translateX(-2px); }
+  10% { opacity: 0; transform: translateX(5px); }
+  15% { opacity: 0.8; transform: translateX(-8px); }
+  25% { opacity: 1; transform: translateX(3px); }
+  45% { opacity: 1; transform: translateX(4px); }
+  65% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0.85; }
+}
+
+/* Decorative elements */
+.arsenal-details-decoration {
+  position: absolute;
+  left: -30px;
+  top: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.deco-line-v {
+  width: 1px;
+  flex-grow: 1;
+  background: linear-gradient(to bottom, transparent, #cf00f3, #cf00f3, transparent);
+  opacity: 0.5;
+}
+
+.deco-square-v {
+  width: 6px;
+  height: 6px;
+  border: 1px solid #cf00f3;
+  transform: rotate(45deg);
+  margin: 5px 0;
+  box-shadow: 0 0 8px rgba(207, 0, 243, 0.4);
+}
