@@ -22,10 +22,13 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
   const lightningRef = useRef();
   const contentRef = useRef();
   const panelMatRef = useRef();
-  const data = selectedIndex !== -1 ? WHO_AM_I_INFO[OPTIONS[selectedIndex]] : null;
 
-  // Load the custom frame texture
-  // Load all textures
+  const data = (selectedIndex !== -1 && OPTIONS[selectedIndex]) ? WHO_AM_I_INFO[OPTIONS[selectedIndex]] : null;
+  const [currentTime, setCurrentTime] = React.useState(new Date());
+  const formattedDate = useMemo(() => currentTime.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.'), [currentTime]);
+  const formattedTime = useMemo(() => currentTime.toLocaleTimeString('en-GB', { hour12: false }), [currentTime]);
+
+  // Load textures
   const frameTex = useTexture('/frame.png');
   const profileTextures = useTexture({
     "WHO I AM": "/who_am_i/1.png",
@@ -68,6 +71,10 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
         contentRef.current.position.x = 0;
         contentRef.current.position.z = 0;
       }
+    }
+
+    if (state.clock.elapsedTime % 1 < 0.05) { // Update roughly every second for efficiency
+      setCurrentTime(new Date());
     }
 
     if (panelMatRef.current) {
@@ -163,35 +170,88 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
                 <planeGeometry args={[6.2, 6.2]} />
                 <meshBasicMaterial color="#ff29f1" transparent opacity={0.3 * opacity} />
               </mesh>
+
+              {/* Stylish Date & Time */}
+              <group position={[0, -4.3, 0]}>
+                {/* Decorative brackets */}
+                <Text
+                  position={[-2.4, 0, 0]}
+                  fontSize={0.6}
+                  color="#ff29f1"
+                  font="/static/Orbitron-Bold.ttf"
+                  fillOpacity={0.6 * opacity}
+                >
+                  [
+                </Text>
+                <Text
+                  position={[2.4, 0, 0]}
+                  fontSize={0.6}
+                  color="#ff29f1"
+                  font="/static/Orbitron-Bold.ttf"
+                  fillOpacity={0.6 * opacity}
+                >
+                  ]
+                </Text>
+
+                {/* Date */}
+                <Text
+                  fontSize={0.4}
+                  anchorX="center"
+                  anchorY="bottom"
+                  color="#ffffff"
+                  font="/static/Orbitron-Bold.ttf"
+                  fillOpacity={0.8 * opacity}
+                >
+                  {formattedDate}
+                </Text>
+
+                {/* Time */}
+                <Text
+                  position={[0, -0.6, 0]}
+                  fontSize={0.3}
+                  anchorX="center"
+                  anchorY="bottom"
+                  color="#d400ff"
+                  font="/static/Orbitron-Bold.ttf"
+                  fillOpacity={0.9 * opacity}
+                >
+                  {formattedTime}
+                </Text>
+
+                {/* Scanning line indicator */}
+                <mesh position={[0, -1, 0]}>
+                  <planeGeometry args={[3, 0.02]} />
+                  <meshBasicMaterial color="#ff29f1" transparent opacity={0.4 * opacity} />
+                </mesh>
+              </group>
             </group>
 
             {/* --- RIGHT SIDE: Profile Insight --- */}
-            <group position={[-2, 2.8, 0.1]}>
+            <group position={[-2, 2.3, 0.1]}>
               <Text
-                fontSize={0.65}
+                fontSize={0.6}
                 anchorX="left"
                 anchorY="top"
-                color="#d400ff"
-                font="/Orbitron-VariableFont_wght.ttf"
+                color="#ffffff"
+                font="/static/Orbitron-Bold.ttf"
                 fillOpacity={opacity}
               >
                 {data.profileTitle}
               </Text>
 
-              {data.details.map((detail, idx) => (
-                <Text
-                  key={idx}
-                  position={[0, -1.0 - idx * 0.8, 0]}
-                  fontSize={0.45}
-                  anchorX="left"
-                  anchorY="top"
-                  color="white"
-                  font="/Orbitron-VariableFont_wght.ttf"
-                  fillOpacity={0.9 * opacity}
-                >
-                  {detail}
-                </Text>
-              ))}
+              <Text
+                position={[0, -1.5, 0]}
+                fontSize={0.45}
+                maxWidth={12} // Reduced from 16 to prevent overflow
+                lineHeight={1.4}
+                anchorX="left"
+                anchorY="top"
+                color="white"
+                font="/static/ShareTechMono-Regular.ttf"
+                fillOpacity={0.9 * opacity}
+              >
+                {data.details}
+              </Text>
             </group>
           </group>
         </Float>

@@ -180,6 +180,35 @@ export function WhoAmIGallery() {
   const [glitchIntensity, setGlitchIntensity] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [transitionGlitch, setTransitionGlitch] = useState(0);
+  const clickAudioCtxRef = useRef(null);
+  const clickAudioBufferRef = useRef(null);
+
+  // Pre-decode click sound for zero-latency playback
+  useEffect(() => {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    clickAudioCtxRef.current = ctx;
+    fetch('/audio/click.mp3')
+      .then((r) => r.arrayBuffer())
+      .then((ab) => ctx.decodeAudioData(ab))
+      .then((buf) => { clickAudioBufferRef.current = buf; })
+      .catch(() => { });
+    return () => ctx.close();
+  }, []);
+
+  const playClickSound = () => {
+    if (clickAudioCtxRef.current && clickAudioBufferRef.current) {
+      if (clickAudioCtxRef.current.state === 'suspended') {
+        clickAudioCtxRef.current.resume();
+      }
+      const src = clickAudioCtxRef.current.createBufferSource();
+      src.buffer = clickAudioBufferRef.current;
+      const gain = clickAudioCtxRef.current.createGain();
+      gain.gain.value = 0.4; // Set a clear volume
+      src.connect(gain);
+      gain.connect(clickAudioCtxRef.current.destination);
+      src.start(clickAudioCtxRef.current.currentTime);
+    }
+  };
 
   useFrame((state, delta) => {
     if (!galleryRef.current) return;
@@ -261,6 +290,7 @@ export function WhoAmIGallery() {
             if (selectedIndex !== i) {
               setSelectedIndex(i);
               setTransitionGlitch(1.0);
+              playClickSound();
             }
           }}
           glitchIntensity={glitchIntensity}

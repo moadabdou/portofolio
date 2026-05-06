@@ -82,7 +82,7 @@ export const PORTFOLIO_PAGES = [
       id: 'who-am-i',
       kind: 'button',
       title: 'WHO AM I',
-      label: '',
+      label: 'IDENTITY',
       edge: 'left',
       direction: 'inverse',
       horizontalShift: 0.22,
@@ -107,44 +107,28 @@ export const WHO_AM_I_INFO = {
   "WHO I AM": {
     image: "/who_am_i/1.png",
     profileTitle: "PROFILE INSIGHT:",
-    details: [
-      "$ NAME: MOAD ABDOU // [SYSTEM_USER]",
-      "$ DESIGNATION: CREATIVE DEVELOPER",
-      "$ LOG_STATUS: ACTIVE & EXPLORING"
-    ],
+    details: "I am a creative developer specializing in the intersection of immersive 3D experiences and scalable backend architectures. With a focus on performance and visual fidelity, I build digital environments that push the boundaries of the modern web.",
     messageTitle: "MESSAGE STREAM:",
     message: "> INITIALIZING USER INTERACTION PROTOCOL. DATA LOG ACQUIRED. EXPLORE TO ACCESS CORE MEMORIES.<"
   },
   "WHAT I BUILD": {
     image: "/who_am_i/2.png",
     profileTitle: "SYSTEM ARCHITECTURE:",
-    details: [
-      "$ CORE: REACT & THREE.JS",
-      "$ SHADERS: GLSL CUSTOM ENGINE",
-      "$ VIBE: CYBERPUNK CINEMATICS"
-    ],
+    details: "Focusing on React, Three.js, and custom GLSL shaders, I craft interactive worlds that feel alive. My work blends cinematic aesthetics with high-performance engineering to create unique user journeys that resonate with modern digital culture.",
     messageTitle: "CONSTRUCTION LOG:",
     message: "> BUILDING IMMERSIVE DIGITAL WORLDS. FOCUSING ON PERFORMANCE AND VISUAL FIDELITY. SYSTEM STABLE.<"
   },
   "HOW I THINK": {
     image: "/who_am_i/3.png",
     profileTitle: "LOGIC CORE:",
-    details: [
-      "$ MODE: PROBLEM SOLVING",
-      "$ STYLE: CLEAN & MODULAR",
-      "$ PRIORITY: USER EXPERIENCE"
-    ],
+    details: "A problem-solver at heart, I approach code as an art form. I prioritize clean, modular architecture and intuitive user experiences, ensuring every project I create is as robust as it is beautiful, focusing on long-term maintainability.",
     messageTitle: "COGNITIVE THREAD:",
     message: "> CODE IS ART. ARCHITECTING ELEGANT SOLUTIONS TO COMPLEX VISUAL CHALLENGES. PROCESSING...<"
   },
   "WHAT'S NEXT": {
     image: "/who_am_i/4.png",
     profileTitle: "FUTURE OBJECTIVES:",
-    details: [
-      "$ RESEARCH: WEBGPU FRONTIER",
-      "$ EXPANSION: GENERATIVE AI",
-      "$ TARGET: DESKTOP-GRADE WEB"
-    ],
+    details: "Constantly exploring the frontier of WebGPU and generative AI, I am dedicated to bringing desktop-grade graphics to the browser. My goal is clear: pushing real-time interactivity to its absolute limit through hardware-accelerated innovation.",
     messageTitle: "UPCOMING STREAM:",
     message: "> PUSHING THE BOUNDARIES OF WHAT'S POSSIBLE IN THE BROWSER. THE FUTURE IS REAL-TIME 3D.<"
   }
