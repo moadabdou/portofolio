@@ -38,7 +38,6 @@ const RING_RADII = [1.65, 2.25, 2.85];
 
 function TechIcon({ icon: Icon, position, opacity, isFocused, size = 0.4, glitch = 0 }) {
   const texture = useMemo(() => {
-    // Use white for focused icons to contrast with the magenta segment background
     const color = isFocused ? "#ffffff" : "#ffffff";
     const svgString = renderToStaticMarkup(
       <Icon color={color} size={64} strokeWidth={1.5} />
@@ -65,10 +64,8 @@ function TechIcon({ icon: Icon, position, opacity, isFocused, size = 0.4, glitch
 
   useFrame((state) => {
     if (!meshRef.current || glitch <= 0) return;
-    // Jitter position during glitch
     meshRef.current.position.x = position[0] + (Math.random() - 0.5) * glitch * 0.1;
     meshRef.current.position.y = position[1] + (Math.random() - 0.5) * glitch * 0.1;
-    // Randomly flicker visibility
     meshRef.current.visible = Math.random() > glitch * 0.3;
   });
 
@@ -83,6 +80,47 @@ function TechIcon({ icon: Icon, position, opacity, isFocused, size = 0.4, glitch
         toneMapped={false}
       />
     </mesh>
+  );
+}
+
+function CurvedText({ text, radius, opacity }) {
+  const chars = text.split("");
+  const charSpacing = 0.14; 
+  
+  return (
+    <group>
+      {chars.map((char, i) => {
+        const totalChars = chars.length;
+        // Reverse order: i goes from 0 (M) to 8 (S). 
+        // We want M to be on the left (positive angle offset) and S on the right (negative angle offset).
+        const angleOffset = ((totalChars - 1) / 2 - i) * charSpacing;
+        const angle = Math.PI / 2 + angleOffset;
+        
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        const rotationZ = angle - Math.PI / 2;
+
+        return (
+          <Text
+            key={i}
+            position={[x, y, 0]}
+            rotation={[0, 0, rotationZ]}
+            fontSize={0.24}
+            font="/Orbitron-VariableFont_wght.ttf"
+            color="#ef4bfb"
+            fillOpacity={opacity * 0.8}
+            outlineWidth={0.015} // Adds "thickness" to the font
+            outlineColor="#ef4bfb"
+            outlineOpacity={opacity * 0.4}
+            textAlign="center"
+            anchorX="center"
+            anchorY="middle"
+          >
+            {char.toUpperCase()}
+          </Text>
+        );
+      })}
+    </group>
   );
 }
 
@@ -164,7 +202,6 @@ export function ArsenalGallery() {
       const pageOffset = getRelativeOffset(offset, pageIndex, pageCount);
       if (pageOffset < 0.3 || pageOffset > 0.7) return;
 
-      // Prevent default scrolling for all hub-navigation keys
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
       }
@@ -227,7 +264,6 @@ export function ArsenalGallery() {
     const nextOpacity = entranceProgress * exitVisibility;
     setOpacity(nextOpacity);
 
-    // Glitch decay
     if (transitionGlitch > 0.01) {
       setTransitionGlitch(THREE.MathUtils.lerp(transitionGlitch, 0, delta * 12));
     } else if (transitionGlitch !== 0) {
@@ -256,6 +292,9 @@ export function ArsenalGallery() {
         />
       ))}
 
+      {/* Curved "MY SKILLS" Text */}
+      <CurvedText text="MY SKILLS" radius={3.3} opacity={opacity} />
+
       <group>
         <mesh>
           <circleGeometry args={[1.3, 64]} />
@@ -278,7 +317,6 @@ export function ArsenalGallery() {
         
         <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
           <group position={[0, 0, 0.2]}>
-            {/* Big Central Icon */}
             <TechIcon 
               icon={focusedIcon} 
               position={[0, 0.1, 0]} 
@@ -288,7 +326,6 @@ export function ArsenalGallery() {
               glitch={transitionGlitch}
             />
             
-            {/* Small Name Underneath */}
             <Text
               fontSize={0.15}
               position={[0, -0.6, 0]} 
