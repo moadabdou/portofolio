@@ -136,9 +136,9 @@ export const PORTFOLIO_PAGES = [
     id: 'contact',
     scene: {
       station: {
-        position: [7, -3, -15],
+        position: [4.85, -5.15, -4.45],
         scale: 2.0,
-        rotation: [-1.2, 1.5, -0.8],
+        rotation: [-0.31, 6.24, -1.10],
       },
     },
     headerBump: {

@@ -1,0 +1,237 @@
+.contact-links-container {
+  position: absolute;
+  left: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: auto;
+  font-family: 'Share Tech Mono', monospace;
+  transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
+  width: 420px;
+}
+
+/* Header styled exactly like ProjectDetails */
+.contact-links-header {
+  margin-bottom: 2.5rem;
+  position: relative;
+  padding-left: 2.5rem;
+}
+
+.contact-links-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #cf00f3;
+  letter-spacing: 0.3em;
+  margin: 0 0 0.5rem 0;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+.contact-links-title {
+  font-family: 'BigsRobotic', sans-serif;
+  font-size: 2.6rem;
+  color: #fff;
+  font-weight: normal;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  margin: 0;
+  text-shadow: 0 0 15px rgba(207, 0, 243, 0.6);
+  text-transform: uppercase;
+}
+
+/* Honeycomb Grid Container */
+.honeycomb-grid {
+  position: relative;
+  width: 210px;
+  height: 300px;
+  margin-left: 2.5rem;
+}
+
+/* Base Hexagon Container with regular aspect ratio */
+.hex-btn-wrapper {
+  position: absolute;
+  width: 120px;
+  height: 138px;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease;
+  pointer-events: auto;
+}
+
+/* Staggered Honeycomb Interlocking Positions (W*0.75 = 90px horizontal step, H*0.75 = 104px vertical step) */
+.hex-gmail {
+  left: 0;
+  top: 0;
+}
+
+.hex-github {
+  left: 90px;
+  top: 52px;
+}
+
+.hex-linkedin {
+  left: 0;
+  top: 104px;
+}
+
+.hex-whatsapp {
+  left: 90px;
+  top: 156px;
+}
+
+/* Hexagon SVG Styling with project colors */
+.hex-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hex-polygon {
+  fill: rgba(15, 2, 28, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  stroke: rgba(207, 0, 243, 0.4);
+  stroke-width: 1.5px;
+  transition: fill 0.3s ease, stroke 0.4s ease, stroke-width 0.4s ease, filter 0.4s ease;
+}
+
+/* Hotspots Hover State matching ProjectDetails link glow */
+.hex-btn-wrapper:hover {
+  transform: scale(1.1) translateZ(0);
+  z-index: 5;
+}
+
+.hex-btn-wrapper:hover .hex-polygon {
+  fill: rgba(207, 0, 243, 0.1);
+  stroke: #cf00f3;
+  stroke-width: 2.2px;
+  filter: drop-shadow(0 0 8px rgba(207, 0, 243, 0.85));
+}
+
+/* Center Content Overlay */
+.hex-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hex-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 0.5rem;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease, filter 0.3s ease;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Hover icons turn Neon Cyan, reflecting the dual cyberpunk look */
+.hex-btn-wrapper:hover .hex-icon {
+  transform: scale(1.15) rotate(5deg);
+  color: #00ffff;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 255, 0.8));
+}
+
+.hex-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: normal;
+  letter-spacing: 0.18em;
+  margin-right: -0.18em; /* Offset letter-spacing to guarantee pixel-perfect centering */
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.hex-btn-wrapper:hover .hex-label {
+  color: #fff;
+  transform: translateY(1px);
+}
+
+/* Vertical Stencil Grid & Tech Decors matching ProjectDetails */
+.contact-links-decor {
+  margin-top: 2rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 2.5rem;
+}
+
+.decor-line {
+  flex-grow: 1;
+  height: 1px;
+  background: linear-gradient(90deg, #cf00f3, transparent);
+  opacity: 0.5;
+  position: relative;
+}
+
+.decor-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -2.5px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid #cf00f3;
+  transform: rotate(45deg);
+  box-shadow: 0 0 6px rgba(207, 0, 243, 0.4);
+}
+
+.decor-code {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(207, 0, 243, 0.5);
+  letter-spacing: 0.2em;
+}
+
+/* Stencil Left Border elements matching .project-details-decoration */
+.contact-links-decor-left {
+  position: absolute;
+  left: 0;
+  top: -15px;
+  height: calc(100% + 30px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.deco-square-left {
+  width: 6px;
+  height: 6px;
+  border: 1px solid #cf00f3;
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px rgba(207, 0, 243, 0.4);
+}
+
+.deco-line-left {
+  width: 1px;
+  flex-grow: 1;
+  background: linear-gradient(to bottom, transparent, #cf00f3, #cf00f3, transparent);
+  opacity: 0.5;
+}
+
+/* Responsiveness adjustments */
+@media (max-height: 700px) {
+  .contact-links-container {
+    top: 52%;
+    transform: translateY(-50%) scale(0.85);
+  }
+}
+
+@media (max-width: 900px) {
+  .contact-links-container {
+    left: 5%;
+    transform: translateY(-50%) scale(0.9);
+  }
+}

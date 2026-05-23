@@ -1,0 +1,313 @@
+/* Cyberpunk Telemetry Calibrator CSS */
+
+.telemetry-dashboard {
+  position: absolute;
+  bottom: 8%;
+  left: 6%;
+  z-index: 10;
+  width: 360px;
+  background: rgba(14, 8, 25, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(239, 75, 251, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5),
+              0 0 25px 0 rgba(239, 75, 251, 0.12);
+  border-radius: 12px;
+  padding: 24px;
+  font-family: 'Share Tech Mono', monospace;
+  color: #f1f0f5;
+  user-select: none;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.telemetry-dashboard.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* scanline overlay */
+.telemetry-dashboard::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 2;
+  background-size: 100% 3px, 3px 100%;
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.dashboard-header {
+  border-bottom: 1px solid rgba(239, 75, 251, 0.2);
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.dashboard-title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #ffffff;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #ef4bfb;
+  box-shadow: 0 0 10px #ef4bfb;
+}
+
+.status-dot.active {
+  animation: blink 2s infinite ease-in-out;
+}
+
+.status-dot.spinning {
+  background-color: #00ffff;
+  box-shadow: 0 0 10px #00ffff;
+  animation: blink 0.5s infinite ease-in-out;
+}
+
+.status-label {
+  font-size: 10px;
+  color: rgba(239, 75, 251, 0.85);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* Dividing telemetry sections */
+.slider-section-header {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 22px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+  padding-bottom: 4px;
+}
+
+.slider-group {
+  margin-bottom: 16px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.slider-name {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.slider-value {
+  color: #ef4bfb;
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(239, 75, 251, 0.55);
+}
+
+/* custom neon slider */
+.neon-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  outline: none;
+  position: relative;
+  border: 1px solid rgba(239, 75, 251, 0.15);
+}
+
+.neon-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 18px;
+  border-radius: 2px;
+  background: #ffffff;
+  border: 2px solid #ef4bfb;
+  box-shadow: 0 0 8px #ef4bfb;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.neon-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px #ef4bfb, 0 0 4px #ffffff;
+}
+
+/* Glowing Blue Theme for Position Sliders */
+.neon-slider.blue {
+  border-color: rgba(0, 255, 255, 0.15);
+}
+
+.neon-slider.blue::-webkit-slider-thumb {
+  border: 2px solid #00ffff;
+  box-shadow: 0 0 8px #00ffff;
+}
+
+.neon-slider.blue::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 12px #00ffff, 0 0 4px #ffffff;
+}
+
+/* Color slider value cyan if inside a blue slider group */
+.slider-group:has(.neon-slider.blue) .slider-value {
+  color: #00ffff;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.55);
+}
+
+.neon-slider:disabled {
+  opacity: 0.3;
+}
+
+.neon-slider:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.tech-btn {
+  flex: 1;
+  background: rgba(239, 75, 251, 0.06);
+  border: 1px solid rgba(239, 75, 251, 0.4);
+  color: #ffffff;
+  padding: 10px 0;
+  border-radius: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s ease;
+  overflow: hidden;
+  box-shadow: inset 0 0 10px rgba(239, 75, 251, 0.05);
+}
+
+.tech-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.6s ease;
+}
+
+.tech-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.tech-btn:hover:not(:disabled) {
+  background: rgba(239, 75, 251, 0.15);
+  border-color: #ef4bfb;
+  box-shadow: 0 0 12px rgba(239, 75, 251, 0.35);
+  text-shadow: 0 0 5px #ffffff;
+}
+
+.tech-btn.active {
+  background: rgba(0, 255, 255, 0.18);
+  border-color: #00ffff;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.35);
+  color: #00ffff;
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.5);
+}
+
+/* Copy Button Styling */
+.tech-btn.copy-btn:hover:not(:disabled) {
+  background: rgba(0, 255, 255, 0.15);
+  border-color: #00ffff;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.35);
+}
+
+.tech-btn.copy-btn.active {
+  background: rgba(46, 204, 113, 0.2) !important;
+  border-color: #2ecc71 !important;
+  color: #2ecc71 !important;
+  box-shadow: 0 0 15px rgba(46, 204, 113, 0.4) !important;
+  text-shadow: 0 0 6px rgba(46, 204, 113, 0.5) !important;
+}
+
+.tech-btn.reset:hover:not(:disabled) {
+  background: rgba(255, 0, 60, 0.15);
+  border-color: #ff003c;
+  box-shadow: 0 0 12px rgba(255, 0, 60, 0.35);
+}
+
+.tech-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Corner Telemetry Decorations */
+.corner-decor {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: rgba(239, 75, 251, 0.7);
+  border-style: solid;
+  pointer-events: none;
+}
+
+.corner-decor.top-left {
+  top: 8px; left: 8px;
+  border-width: 2px 0 0 2px;
+}
+
+.corner-decor.top-right {
+  top: 8px; right: 8px;
+  border-width: 2px 2px 0 0;
+}
+
+.corner-decor.bottom-left {
+  bottom: 8px; left: 8px;
+  border-width: 0 0 2px 2px;
+}
+
+.corner-decor.bottom-right {
+  bottom: 8px; right: 8px;
+  border-width: 0 2px 2px 0;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .telemetry-dashboard {
+    bottom: 5%;
+    left: 5%;
+    right: 5%;
+    width: auto;
+    padding: 16px;
+  }
+  .dashboard-actions {
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .tech-btn {
+    padding: 8px 0;
+  }
+}

@@ -13,10 +13,11 @@ import HeaderFrame from './components/HeaderFrame';
 import { WhoAmIGallery } from './components/WhoAmIGallery';
 import { ArsenalGallery } from './components/ArsenalGallery';
 import { ProjectsGallery } from './components/ProjectsGallery';
+import { ContactOrbit } from './components/ContactOrbit';
 import { PORTFOLIO_PAGES } from './portfolioPageData';
 import { PORTFOLIO_PAGE_VIEWS } from './portfolioPageViews';
-import { scrollState, galleryState } from './portfolioState';
-import { getInterpolatedPageState } from './utils/portfolioTimeline';
+import { scrollState, galleryState, contactControlState } from './portfolioState';
+import { getInterpolatedPageState, clamp } from './utils/portfolioTimeline';
 
 // Wrap the custom Effect class into a React component
 const Wake = wrapEffect(WakeEffect);
@@ -135,9 +136,18 @@ function Scene() {
 
     const stationState = getInterpolatedPageState(PORTFOLIO_PAGES, offset, 'station');
 
+    if (offset >= 0.75 && contactControlState.autoSpin) {
+      contactControlState.ry += delta * 0.25;
+    }
+
     if (stationGroupRef.current) {
+      const contactProgress = clamp((offset - 0.75) / 0.25, 0, 1);
+
       if (stationState?.position) {
-        stationGroupRef.current.position.set(...stationState.position);
+        const px = stationState.position[0] + contactControlState.px * contactProgress;
+        const py = stationState.position[1] + contactControlState.py * contactProgress;
+        const pz = stationState.position[2] + contactControlState.pz * contactProgress;
+        stationGroupRef.current.position.set(px, py, pz);
       }
 
       if (typeof stationState?.scale === 'number') {
@@ -145,7 +155,10 @@ function Scene() {
       }
 
       if (stationState?.rotation) {
-        stationGroupRef.current.rotation.set(...stationState.rotation);
+        const rx = stationState.rotation[0] + contactControlState.rx * contactProgress;
+        const ry = stationState.rotation[1] + contactControlState.ry * contactProgress;
+        const rz = stationState.rotation[2] + contactControlState.rz * contactProgress;
+        stationGroupRef.current.rotation.set(rx, ry, rz);
       }
     }
 
@@ -179,6 +192,7 @@ function Scene() {
               rotation={[-1.4698, -0.4558, -1.8012]}
             />
             <ProjectsGallery />
+            <ContactOrbit />
           </group>
           <WhoAmIGallery />
         </group>

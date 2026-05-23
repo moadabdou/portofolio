@@ -4,6 +4,8 @@ import MoadName from './components/MoadName';
 import ProjectDetails from './components/ProjectDetails';
 import ArsenalDetails from './components/ArsenalDetails';
 import KeyboardHint from './components/KeyboardHint';
+import ContactDetails from './components/ContactDetails';
+import ContactLinks from './components/ContactLinks';
 import { WhoAmIGallery } from './components/WhoAmIGallery';
 import { PORTFOLIO_PAGES } from './portfolioPageData';
 
@@ -17,7 +19,7 @@ const PORTFOLIO_PAGE_RENDERERS = {
   ),
   'who-am-i': () => null,
   'arsenal': () => <ArsenalDetails />,
-  'contact': () => null,
+  'contact': () => <ContactLinks />,
 };
 
 export const PORTFOLIO_PAGE_VIEWS = PORTFOLIO_PAGES.map((page) => ({
