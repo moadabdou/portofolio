@@ -30,8 +30,30 @@ export default function MoadName() {
     }
   });
 
-  const introText = "Passionate about the intersection of deep learning and systems engineering — building resilient, low-latency backend architectures designed to sustain the next generation of intelligent applications.";
-  const introChars = useMemo(() => introText.split(''), [introText]);
+  const introText = "Software Engineering student specializing in systems architecture, low-level networking, and machine learning internals. Building high-throughput distributed systems, custom protocol implementations, and optimized neural network tensor libraries. Focused on designing resilient, low-latency infrastructure.";
+  
+  // Group text into words to prevent word-breaks in the middle of words
+  const introWords = useMemo(() => {
+    const words = [];
+    let currentWord = [];
+    
+    for (let i = 0; i < introText.length; i++) {
+      const char = introText[i];
+      if (char === ' ') {
+        if (currentWord.length > 0) {
+          words.push({ type: 'word', chars: currentWord });
+          currentWord = [];
+        }
+        words.push({ type: 'space', chars: [{ char, index: i }] });
+      } else {
+        currentWord.push({ char, index: i });
+      }
+    }
+    if (currentWord.length > 0) {
+      words.push({ type: 'word', chars: currentWord });
+    }
+    return words;
+  }, [introText]);
 
   useEffect(() => {
     // 1. Initial positions calculation
@@ -139,7 +161,7 @@ export default function MoadName() {
       window.removeEventListener('scroll', calculatePositions);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [introChars]);
+  }, [introWords]);
 
   const lines = ["MOAD", "ELABDELLAOUI"];
 
@@ -164,17 +186,38 @@ export default function MoadName() {
       </h1>
 
       <p className="hero-intro">
-        {introChars.map((char, iIdx) => (
-          <span 
-            key={iIdx} 
-            ref={el => {
-              if (el) introLettersRef.current[iIdx] = el;
-            }}
-            className="intro-char"
-          >
-            {char}
-          </span>
-        ))}
+        {introWords.map((wordInfo, wIdx) => {
+          if (wordInfo.type === 'space') {
+            const spaceChar = wordInfo.chars[0];
+            return (
+              <span 
+                key={`space-${wIdx}`} 
+                ref={el => {
+                  if (el) introLettersRef.current[spaceChar.index] = el;
+                }}
+                className="intro-char"
+              >
+                {spaceChar.char}
+              </span>
+            );
+          }
+          
+          return (
+            <span key={`word-${wIdx}`} className="intro-word">
+              {wordInfo.chars.map((charInfo) => (
+                <span 
+                  key={charInfo.index} 
+                  ref={el => {
+                    if (el) introLettersRef.current[charInfo.index] = el;
+                  }}
+                  className="intro-char"
+                >
+                  {charInfo.char}
+                </span>
+              ))}
+            </span>
+          );
+        })}
       </p>
       
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>

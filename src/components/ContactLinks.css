@@ -94,7 +94,7 @@
   -webkit-backdrop-filter: blur(10px);
   stroke: rgba(207, 0, 243, 0.4);
   stroke-width: 1.5px;
-  transition: fill 0.12s ease, stroke 0.12s ease, stroke-width 0.12s ease, filter 0.12s ease;
+  transition: fill 0.4s ease, stroke 0.4s ease, stroke-width 0.4s ease, filter 0.4s ease;
 }
 
 /* Hotspots Hover State matching ProjectDetails link glow */

@@ -14,37 +14,37 @@ export const PROJECTS = [
   {
     id: 1,
     img: '/projects/p1.png',
-    title: 'AERO SPEECH',
-    description: 'A cutting-edge hybrid Text-to-Speech engine engineered for ultra-low latency and natural prosody. Built with a distributed backend architecture to handle high-concurrency real-time audio synthesis at scale.',
-    github: 'https://github.com/moadabdou/aerospeech'
+    title: 'MTensor',
+    description: 'A high-performance CPU-based deep learning and autograd engine built in C++. Features an architecture integrated with oneDNN primitives, OpenMP parallelism, and custom AVX-512 fused vector operations for optimizers and reductions. Implements dynamic computational graphs, strided memory layouts, and a comprehensive neural network layer topology from scratch.',
+    github: 'https://github.com/moadabdou/Mtensor'
   },
   {
     id: 2,
     img: '/projects/p2.png',
-    title: 'NEURAL NEXUS',
-    description: 'Advanced deep learning orchestration platform that simplifies the deployment of complex neural networks. Features automated hyperparameter tuning and seamless scaling across multi-GPU environments.',
-    github: 'https://github.com/moadabdou/neural-nexus'
+    title: 'Fern-OS',
+    description: 'A high-concurrency distributed job orchestration engine built to schedule and execute DAG workflows over custom network primitives. Features a central orchestrator leveraging Java 21 Virtual Threads and Spring Boot, communicating with decentralized plain-Java worker nodes via a custom-built, big-endian binary TCP wire protocol. Implements robust crash recovery, isolated state persistence with PostgreSQL, distributed state management (XCom) using MinIO, and a comprehensive Python SDK for programmatic workflow definitions.',
+    github: 'https://github.com/moadabdou/fernos'
   },
   {
     id: 3,
     img: '/projects/p3.png',
-    title: 'CYBER CORE',
-    description: 'Enterprise-grade cybersecurity monitoring system utilizing transformer-based anomaly detection. It provides real-time threat intelligence and automated incident response for critical infrastructure.',
-    github: 'https://github.com/moadabdou/cyber-core'
+    title: 'ArimaSSH',
+    description: 'A modular, pure Java implementation of the SSH-2 protocol (RFC 4253) and SFTP subsystem engineered from the bare metal. Built without high-level SSH dependencies, it maps raw TCP sockets directly to Java 21 Virtual Threads for non-blocking, asynchronous connection handling. Features custom binary packet serialization, stateful Diffie-Hellman key exchanges via Bouncy Castle, CTR-mode AES symmetric encryption, and full TCP/IP port forwarding multiplexing.',
+    github: 'https://github.com/moadabdou/arimassh'
   },
   {
     id: 4,
     img: '/projects/p4.png',
-    title: 'VIRTUAL VORTEX',
-    description: 'A high-performance WebGL visualization engine designed for rendering complex fluid dynamics and particle systems in real-time. Leverages custom GLSL shaders for cinematic-quality visual effects.',
-    github: 'https://github.com/moadabdou/virtual-vortex'
+    title: 'e-Service',
+    description: 'An Academic Resource Planning application designed to automate and optimize teaching load allocations within department faculties. Engineered with a strict Role-Based Access Control (RBAC) matrix separating Administrators, Department Heads, Program Coordinators, and Faculty Staff. Features a stateful workflow engine for expressing module preferences, tracking cascading validation matrices, calculating dynamic hourly quotas, and generating granular administrative reports',
+    github: 'https://github.com/moadabdou/e-service'
   },
   {
     id: 5,
     img: '/projects/p5.png',
-    title: 'QUANTUM QUARTZ',
-    description: 'High-dimensional data analytics suite specialized in quantum computing simulations. Offers immersive 3D visualizations and predictive modeling for multi-variable experimental datasets.',
-    github: 'https://github.com/moadabdou/quantum-quartz'
+    title: 'AeroSpeech',
+    description: 'A high-fidelity, non-autoregressive Text-to-Speech (TTS) synthesis engine utilizing a novel hybrid deep learning architecture. The system replaces standard Transformer self-attention layers with a low-latency pipeline combining Gated Linear Attention (GLA) and Mamba 2 state-space models (SSMs) to achieve $O(N)$ linear complexity during text-to-mel spectrogram generation. Features integrated multi-variance adaptors for pitch, energy, and duration alignment, coupled with a pretrained HiFi-GAN vocoder execution layer for real-time acoustic neural decoding.',
+    github: 'https://github.com/moadabdou/aerospeech'
   },
 ];
 
@@ -248,7 +248,7 @@ export function ProjectsGallery() {
     const handleKeyDown = (e) => {
       const offset = scroll.offset;
       const pageOffset = getRelativeOffset(offset, projectsPageIndex, pageCount);
-      
+
       if (offset > nextPageOffset - 0.02) return;
       // Use pageOffset (0-1) instead of global offset to compare against the timing threshold
       if (pageOffset < (projectsPage?.timing.keyboardNavigationStart ?? 0.6)) return;
@@ -280,7 +280,7 @@ export function ProjectsGallery() {
 
     const scaleProgress = THREE.MathUtils.smoothstep(pageOffset, projectsPage?.timing.galleryScaleStart ?? 0.3, projectsPage?.timing.galleryScaleEnd ?? 0.5);
     const glitchProgress = THREE.MathUtils.smoothstep(pageOffset, projectsPage?.timing.galleryGlitchStart ?? 0.3, projectsPage?.timing.galleryGlitchEnd ?? 0.5);
-    
+
     // Exit logic: fade out as we approach the end of the page range (relative offset 1.0)
     const exitFadeDistance = projectsPage?.timing.galleryExitFadeDistance ?? 0.3;
     const exitStart = 1.0 - exitFadeDistance;

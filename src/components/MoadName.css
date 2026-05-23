@@ -52,6 +52,11 @@
   text-transform: uppercase;
 }
 
+.intro-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
 .intro-char {
   display: inline-block;
   white-space: pre;
