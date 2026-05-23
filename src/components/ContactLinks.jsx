@@ -43,29 +43,6 @@ export default function ContactLinks() {
   const pageCount = PORTFOLIO_PAGES.length;
   const containerRef = useRef();
 
-  // Custom audio sweep synthesizer for premium interactive feedback
-  const playHoverSound = () => {
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(850, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1450, audioCtx.currentTime + 0.08);
-
-      gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.08);
-    } catch (e) {
-      // Ignored if browser restricts Web Audio API before user gesture
-    }
-  };
-
   const playClickSound = () => {
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -130,7 +107,6 @@ export default function ContactLinks() {
             <div
               key={channel.id}
               className={`hex-btn-wrapper ${channel.cssClass}`}
-              onMouseEnter={playHoverSound}
               onClick={() => handleChannelClick(channel.url)}
             >
               <svg viewBox="0 0 120 138" className="hex-svg">

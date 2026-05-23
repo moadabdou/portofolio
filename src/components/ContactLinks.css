@@ -45,8 +45,8 @@
 /* Honeycomb Grid Container */
 .honeycomb-grid {
   position: relative;
-  width: 210px;
-  height: 300px;
+  width: 250px;
+  height: 370px;
   margin-left: 2.5rem;
 }
 
@@ -56,29 +56,29 @@
   width: 120px;
   height: 138px;
   cursor: pointer;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease;
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), filter 0.15s ease;
   pointer-events: auto;
 }
 
-/* Staggered Honeycomb Interlocking Positions (W*0.75 = 90px horizontal step, H*0.75 = 104px vertical step) */
+/* Staggered Honeycomb Interlocking Positions with a beautiful uniform ~12px visual gap */
 .hex-gmail {
   left: 0;
   top: 0;
 }
 
 .hex-github {
-  left: 90px;
-  top: 52px;
+  left: 128px;
+  top: 75px;
 }
 
 .hex-linkedin {
   left: 0;
-  top: 104px;
+  top: 150px;
 }
 
 .hex-whatsapp {
-  left: 90px;
-  top: 156px;
+  left: 128px;
+  top: 225px;
 }
 
 /* Hexagon SVG Styling with project colors */
@@ -94,12 +94,11 @@
   -webkit-backdrop-filter: blur(10px);
   stroke: rgba(207, 0, 243, 0.4);
   stroke-width: 1.5px;
-  transition: fill 0.3s ease, stroke 0.4s ease, stroke-width 0.4s ease, filter 0.4s ease;
+  transition: fill 0.12s ease, stroke 0.12s ease, stroke-width 0.12s ease, filter 0.12s ease;
 }
 
 /* Hotspots Hover State matching ProjectDetails link glow */
 .hex-btn-wrapper:hover {
-  transform: scale(1.1) translateZ(0);
   z-index: 5;
 }
 
@@ -130,7 +129,7 @@
   width: 24px;
   height: 24px;
   margin-bottom: 0.5rem;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease, filter 0.3s ease;
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), color 0.12s ease, filter 0.12s ease;
   color: rgba(255, 255, 255, 0.7);
 }
 
@@ -146,10 +145,11 @@
   font-size: 0.65rem;
   font-weight: normal;
   letter-spacing: 0.18em;
-  margin-right: -0.18em; /* Offset letter-spacing to guarantee pixel-perfect centering */
+  margin-right: -0.18em;
+  /* Offset letter-spacing to guarantee pixel-perfect centering */
   color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
-  transition: color 0.3s ease, transform 0.3s ease;
+  transition: color 0.12s ease, transform 0.12s ease;
 }
 
 .hex-btn-wrapper:hover .hex-label {
