@@ -132,7 +132,36 @@ export const PORTFOLIO_PAGES = [
       galleryExitFadeDistance: 0.2,
     },
   },
+  {
+    id: 'contact',
+    scene: {
+      station: {
+        position: [7, -3, -15],
+        scale: 2.0,
+        rotation: [-1.2, 1.5, -0.8],
+      },
+    },
+    headerBump: {
+      id: 'contact',
+      kind: 'button',
+      title: 'CONTACT ME',
+      label: 'CONNECT',
+      edge: 'left',
+      direction: 'inverse',
+      horizontalShift: 0.22,
+      pillBaseWidth: 60,
+      pillWidthDelta: 120,
+      pocketBaseWidth: 80,
+      pocketWidthDelta: 130,
+      pocketDepth: 80,
+      topOffset: -20,
+    },
+    timing: {
+      galleryExitFadeDistance: 0.2,
+    },
+  },
 ];
+
 
 
 export const WHO_AM_I_INFO = {

@@ -213,13 +213,18 @@ function ControlIndicator({ opacity }) {
 
 export function ArsenalGallery() {
   const groupRef = useRef();
+  const ring0Ref = useRef();
+  const ring1Ref = useRef();
+  const ring2Ref = useRef();
+  const labelsRef = useRef();
+  const coreRef = useRef();
   const scroll = useScroll();
   const pageIndex = getPortfolioPageIndex('arsenal');
   const pageCount = PORTFOLIO_PAGES.length;
 
   const [activeLevel, setActiveLevel] = useState(0);
   const [focusIndices, setFocusIndices] = useState(ARSENAL_DATA.map(() => 0));
-  const [opacity, setOpacity] = useState(0);
+  const [layerOpacities, setLayerOpacities] = useState([0, 0, 0, 0, 0]);
   const [transitionGlitch, setTransitionGlitch] = useState(0);
   const clickSoundRef = useRef(null);
 
@@ -291,6 +296,14 @@ export function ArsenalGallery() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeLevel, scroll, pageIndex, pageCount]);
 
+  const LAYERS_EXIT_CONFIG = useMemo(() => [
+    { start: 0.50, end: 0.65 }, // Layer 0: CurvedText & ControlIndicator
+    { start: 0.55, end: 0.75 }, // Layer 1: Ring 2 (Protocols)
+    { start: 0.65, end: 0.85 }, // Layer 2: Ring 1 (Tools)
+    { start: 0.75, end: 0.95 }, // Layer 3: Ring 0 (Foundation)
+    { start: 0.85, end: 1.00 }, // Layer 4: Central Core
+  ], []);
+
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     const offset = scroll.offset;
@@ -299,13 +312,53 @@ export function ArsenalGallery() {
     const entranceStart = 0.3;
     const entranceEnd = 0.5;
     const entranceProgress = clamp((pageOffset - entranceStart) / (entranceEnd - entranceStart), 0, 1);
-    
-    const exitFadeDistance = 0.2;
-    const isLastPage = pageIndex === pageCount - 1;
-    const exitVisibility = isLastPage ? 1 : clamp((1.0 - pageOffset) / exitFadeDistance, 0, 1);
 
-    const nextOpacity = entranceProgress * exitVisibility;
-    setOpacity(nextOpacity);
+    const nextOpacities = LAYERS_EXIT_CONFIG.map((config) => {
+      if (pageOffset < 0.5) {
+        return entranceProgress;
+      }
+      const exitProgress = clamp((pageOffset - config.start) / (config.end - config.start), 0, 1);
+      return entranceProgress * (1.0 - exitProgress);
+    });
+
+    let changed = false;
+    for (let i = 0; i < 5; i++) {
+      if (Math.abs(nextOpacities[i] - layerOpacities[i]) > 0.001) {
+        changed = true;
+        break;
+      }
+    }
+    if (changed) {
+      setLayerOpacities(nextOpacities);
+    }
+
+    LAYERS_EXIT_CONFIG.forEach((config, i) => {
+      let glitch = 0;
+      let opacityVal = nextOpacities[i];
+      
+      if (pageOffset >= 0.5) {
+        const exitProgress = clamp((pageOffset - config.start) / (config.end - config.start), 0, 1);
+        glitch = Math.sin(exitProgress * Math.PI) * exitProgress;
+      }
+
+      let ref;
+      if (i === 0) ref = labelsRef;
+      else if (i === 1) ref = ring2Ref;
+      else if (i === 2) ref = ring1Ref;
+      else if (i === 3) ref = ring0Ref;
+      else if (i === 4) ref = coreRef;
+
+      if (ref && ref.current) {
+        if (glitch > 0.01) {
+          ref.current.position.x = (Math.random() - 0.5) * glitch * 0.5;
+          ref.current.position.y = (Math.random() - 0.5) * glitch * 0.5;
+          ref.current.visible = Math.random() > glitch * 0.45;
+        } else {
+          ref.current.position.set(0, 0, 0);
+          ref.current.visible = opacityVal > 0.01;
+        }
+      }
+    });
 
     if (transitionGlitch > 0.01) {
       setTransitionGlitch(THREE.MathUtils.lerp(transitionGlitch, 0, delta * 12));
@@ -313,7 +366,8 @@ export function ArsenalGallery() {
       setTransitionGlitch(0);
     }
 
-    groupRef.current.visible = nextOpacity > 0.01;
+    const isAnyVisible = nextOpacities.some((op) => op > 0.01);
+    groupRef.current.visible = isAnyVisible;
     groupRef.current.scale.setScalar(entranceProgress);
     groupRef.current.rotation.y = -0.4;
   });
@@ -324,28 +378,38 @@ export function ArsenalGallery() {
 
   return (
     <group ref={groupRef} position={[4, 0, 0]}>
-      {ARSENAL_DATA.map((levelData, i) => (
-        <OrbitalRing
-          key={levelData.name}
-          items={levelData.items}
-          icons={levelData.icons}
-          radius={RING_RADII[i]}
-          isActive={activeLevel === i}
-          focusIndex={focusIndices[i]}
-          opacity={opacity}
-        />
-      ))}
+      {ARSENAL_DATA.map((levelData, i) => {
+        const opacityIdx = 3 - i;
+        let ringRef;
+        if (i === 0) ringRef = ring0Ref;
+        else if (i === 1) ringRef = ring1Ref;
+        else if (i === 2) ringRef = ring2Ref;
 
-      <CurvedText text="MY SKILLS" radius={3.3} opacity={opacity} />
+        return (
+          <group key={levelData.name} ref={ringRef}>
+            <OrbitalRing
+              items={levelData.items}
+              icons={levelData.icons}
+              radius={RING_RADII[i]}
+              isActive={activeLevel === i}
+              focusIndex={focusIndices[i]}
+              opacity={layerOpacities[opacityIdx]}
+            />
+          </group>
+        );
+      })}
 
-      <ControlIndicator opacity={opacity} />
+      <group ref={labelsRef}>
+        <CurvedText text="MY SKILLS" radius={3.3} opacity={layerOpacities[0]} />
+        <ControlIndicator opacity={layerOpacities[0]} />
+      </group>
 
-      <group>
+      <group ref={coreRef}>
         <mesh>
           <circleGeometry args={[1.3, 64]} />
           <meshBasicMaterial
             transparent
-            opacity={opacity * 0.15}
+            opacity={layerOpacities[4] * 0.15}
             color="#d900ff"
             depthWrite={false}
           />
@@ -354,7 +418,7 @@ export function ArsenalGallery() {
           <ringGeometry args={[1.25, 1.3, 64]} />
           <meshBasicMaterial
             transparent
-            opacity={opacity * 0.8}
+            opacity={layerOpacities[4] * 0.8}
             color="#ff00ff"
             depthWrite={false}
           />
@@ -365,7 +429,7 @@ export function ArsenalGallery() {
             <TechIcon 
               icon={focusedIcon} 
               position={[0, 0.1, 0]} 
-              opacity={opacity} 
+              opacity={layerOpacities[4]} 
               isFocused={true} 
               size={0.8}
               glitch={transitionGlitch}
@@ -376,7 +440,7 @@ export function ArsenalGallery() {
               position={[0, -0.6, 0]} 
               font="/Orbitron-VariableFont_wght.ttf"
               color="#ef4bfb"
-              fillOpacity={opacity * (transitionGlitch > 0 && Math.random() > 0.5 ? 0.3 : 1)}
+              fillOpacity={layerOpacities[4] * (transitionGlitch > 0 && Math.random() > 0.5 ? 0.3 : 1)}
               textAlign="center"
               anchorY="middle"
               maxWidth={2.0}

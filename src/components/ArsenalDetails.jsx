@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useScroll } from '@react-three/drei';
 import { arsenalState } from '../portfolioState';
 import { getPortfolioPageIndex, PORTFOLIO_PAGES } from '../portfolioPageData';
-import { clamp, getRelativeOffset } from '../utils/portfolioTimeline';
+import { clamp, getRelativeOffset, getPageFocus } from '../utils/portfolioTimeline';
 import './ArsenalDetails.css';
 
 const ARSENAL_DATA = [
@@ -62,11 +62,8 @@ export default function ArsenalDetails() {
     const entranceEnd = 0.5;
     const entranceProgress = clamp((pageOffset - entranceStart) / (entranceEnd - entranceStart), 0, 1);
     
-    const exitFadeDistance = 0.2;
-    const isLastPage = pageIndex === pageCount - 1;
-    const exitVisibility = isLastPage ? 1 : clamp((1.0 - pageOffset) / exitFadeDistance, 0, 1);
-    
-    const visibility = entranceProgress * exitVisibility;
+    const focus = getPageFocus(offset, pageIndex, pageCount);
+    const visibility = entranceProgress * focus;
     containerRef.current.style.opacity = visibility;
     containerRef.current.style.visibility = visibility > 0.01 ? 'visible' : 'hidden';
 

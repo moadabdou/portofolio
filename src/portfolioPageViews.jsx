@@ -17,6 +17,7 @@ const PORTFOLIO_PAGE_RENDERERS = {
   ),
   'who-am-i': () => null,
   'arsenal': () => <ArsenalDetails />,
+  'contact': () => null,
 };
 
 export const PORTFOLIO_PAGE_VIEWS = PORTFOLIO_PAGES.map((page) => ({
