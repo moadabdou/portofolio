@@ -49,7 +49,7 @@ export const PROJECTS = [
 ];
 
 
-function ProjectCard({ url, index, total, radius, startAngle, endAngle, xOffset, glitchIntensity, opacity }) {
+function ProjectCard({ url, index, total, radiusRef, startAngle, endAngle, xOffset, glitchIntensityRef, opacityRef }) {
   const groupRef = useRef();
   const meshRef = useRef();
   const frameRef = useRef();
@@ -63,9 +63,6 @@ function ProjectCard({ url, index, total, radius, startAngle, endAngle, xOffset,
 
   // Calculate position along a full circle
   const angle = (index / total) * Math.PI * 2 + 90;
-
-  const y = Math.sin(angle) * radius;
-  const z = Math.cos(angle) * radius;
   const x = xOffset;
   const geometry = useMemo(() => {
     const width = 1.6;
@@ -102,28 +99,35 @@ function ProjectCard({ url, index, total, radius, startAngle, endAngle, xOffset,
   useFrame((state) => {
     if (!groupRef.current) return;
 
+    const curOpacity = opacityRef ? opacityRef.current : 1;
+    const curRadius = radiusRef ? radiusRef.current : 3.6;
+    const curGlitch = glitchIntensityRef ? glitchIntensityRef.current : 0;
+
+    groupRef.current.position.y = Math.sin(angle) * curRadius;
+    groupRef.current.position.z = Math.cos(angle) * curRadius;
+
     if (meshRef.current && meshRef.current.material) {
       meshRef.current.material.uTime = state.clock.elapsedTime;
-      meshRef.current.material.uGlitchIntensity = glitchIntensity;
-      meshRef.current.material.uOpacity = opacity;
+      meshRef.current.material.uGlitchIntensity = curGlitch;
+      meshRef.current.material.uOpacity = curOpacity;
     }
 
     if (hudMeshRef.current && hudMeshRef.current.material) {
       hudMeshRef.current.material.uTime = state.clock.elapsedTime;
-      hudMeshRef.current.material.uGlitchIntensity = glitchIntensity;
+      hudMeshRef.current.material.uGlitchIntensity = curGlitch;
       // Pulse opacity slightly, then multiply by global opacity
       const pulse = 0.4 + Math.sin(state.clock.elapsedTime * 2 + index) * 0.1;
-      hudMeshRef.current.material.uOpacity = pulse * opacity;
+      hudMeshRef.current.material.uOpacity = pulse * curOpacity;
     }
 
     // Glitch-like pulse on the wireframe instead of the image
     if (frameRef.current && frameRef.current.material) {
-      frameRef.current.material.opacity = (0.4 + Math.sin(state.clock.elapsedTime * 8 + index) * 0.2) * opacity;
+      frameRef.current.material.opacity = (0.4 + Math.sin(state.clock.elapsedTime * 8 + index) * 0.2) * curOpacity;
     }
   });
 
   return (
-    <group ref={groupRef} position={[x, y, z]} rotation={[-angle, 0, -Math.PI]}>
+    <group ref={groupRef} position={[x, 0, 0]} rotation={[-angle, 0, -Math.PI]}>
       <mesh ref={meshRef} geometry={geometry}>
         <glitchMaterial
           uTexture={texture}
@@ -185,9 +189,9 @@ export function ProjectsGallery() {
   const rotY = 0;
   const rotZ = Math.PI; // Tweak this if the images are sideways or upside down
 
-  const [glitchIntensity, setGlitchIntensity] = useState(0);
-  const [opacity, setOpacity] = useState(1);
-  const [currentRadius, setCurrentRadius] = useState(radius);
+  const glitchIntensityRef = useRef(0);
+  const opacityRef = useRef(1);
+  const currentRadiusRef = useRef(radius);
   const currentRotation = useRef(0);
 
   // Pre-decode audio for zero-latency playback
@@ -298,8 +302,8 @@ export function ProjectsGallery() {
     const easedExit = Math.pow(exitProgress, 2.5); // Start slow, accelerate
     const nextRadius = radius - easedExit * radius; // Decrease radius to move "in"
 
-    setOpacity(nextOpacity);
-    setCurrentRadius(nextRadius);
+    opacityRef.current = nextOpacity;
+    currentRadiusRef.current = nextRadius;
 
     galleryRef.current.scale.setScalar(visibleScale);
     galleryRef.current.visible = visibleScale > 0.01 && nextOpacity > 0.01;
@@ -308,7 +312,7 @@ export function ProjectsGallery() {
     // already handles the combined rotation for the SpaceStation and the Gallery.
 
     const intensity = Math.pow(1.0 - glitchProgress, 1.0);
-    setGlitchIntensity(intensity);
+    glitchIntensityRef.current = intensity;
 
   });
 
@@ -322,12 +326,12 @@ export function ProjectsGallery() {
             url={project.img}
             index={i}
             total={PROJECTS.length}
-            radius={currentRadius}
+            radiusRef={currentRadiusRef}
             startAngle={startAngle}
             endAngle={endAngle}
             xOffset={xOffset}
-            glitchIntensity={glitchIntensity}
-            opacity={opacity}
+            glitchIntensityRef={glitchIntensityRef}
+            opacityRef={opacityRef}
           />
         ))}
       </group>
