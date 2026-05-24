@@ -59,24 +59,29 @@ function ScrollSnapper() {
 
         const totalScrollableHeight = el.scrollHeight - el.clientHeight;
         const currentOffset = el.scrollTop / totalScrollableHeight;
+        const exactPageIndex = currentOffset * (pageCount - 1);
+        let nearestPageIndex = Math.round(exactPageIndex);
 
-        let nearestPageIndex = Math.round(currentOffset * (pageCount - 1));
-
-        // 2. Single-Page Guard: If we are snapping from a stable position, 
-        // prevent jumping more than one page away unless the user really pushed hard.
-        // This makes the navigation feel much more controlled.
-        const diff = nearestPageIndex - lastSnapIndex.current;
-        if (Math.abs(diff) > 1) {
-          nearestPageIndex = lastSnapIndex.current + Math.sign(diff);
+        // 1.5 Directional bias: If the user scrolls at least 10% towards the next page, 
+        // assume they want to go there and snap forward/backward, instead of pushing them back.
+        const diffFromLastSnap = exactPageIndex - lastSnapIndex.current;
+        if (diffFromLastSnap > 0.1 && nearestPageIndex === lastSnapIndex.current) {
+          nearestPageIndex = lastSnapIndex.current + 1;
+        } else if (diffFromLastSnap < -0.1 && nearestPageIndex === lastSnapIndex.current) {
+          nearestPageIndex = lastSnapIndex.current - 1;
         }
 
+        // Keep it within bounds
+        nearestPageIndex = Math.max(0, Math.min(nearestPageIndex, pageCount - 1));
+
+        // 2. We removed the single-page guard so the user can scroll to the end of the page freely.
         const targetOffset = nearestPageIndex / (pageCount - 1);
         const targetScroll = targetOffset * totalScrollableHeight;
 
         // 3. Proximity Check: Only snap if we are within 100px of the target
         const distance = Math.abs(el.scrollTop - targetScroll);
 
-        if (distance > 0 && distance < 500) {
+        if (distance > 0) {
           gsap.to(el, {
             scrollTop: targetScroll,
             duration: 0.25,
