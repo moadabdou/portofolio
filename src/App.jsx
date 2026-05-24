@@ -34,24 +34,52 @@ function ScrollSnapper() {
   const scroll = useScroll();
   const timeoutRef = useRef();
   const lastSnapIndex = useRef(0);
+  const isSnapping = useRef(false);
 
   useEffect(() => {
     const el = scroll.el;
     if (!el) return;
 
-    // 1. Sensitivity Reducer: Scale down the scroll speed to make it less "slippery"
+    // 1. Hard Brake System: Clamp scroll to adjacent pages
     const handleWheel = (e) => {
-      // Only interfere if we aren't already in a GSAP animation
-      if (gsap.isTweening(el)) return;
+      if (isSnapping.current) {
+        gsap.killTweensOf(el);
+        isSnapping.current = false;
+        
+        // If the user interrupts the snap, we must redefine their current "anchor" page.
+        // Otherwise, the directional bias will think they are still coming from the old page
+        // and fight their scroll direction (especially when scrolling back up).
+        const pageCount = PORTFOLIO_PAGE_VIEWS.length;
+        const totalScrollableHeight = el.scrollHeight - el.clientHeight;
+        const currentOffset = el.scrollTop / totalScrollableHeight;
+        lastSnapIndex.current = Math.round(currentOffset * (pageCount - 1));
+      }
 
       e.preventDefault();
-      // Scale down deltaY to reduce sensitivity (0.4 = 40% of original speed)
-      el.scrollTop += e.deltaY * 0.5;
+
+      const pageCount = PORTFOLIO_PAGE_VIEWS.length;
+      if (pageCount <= 1) return;
+
+      const totalScrollableHeight = el.scrollHeight - el.clientHeight;
+      const pageHeight = totalScrollableHeight / (pageCount - 1);
+
+      const currentIndex = lastSnapIndex.current;
+
+      // Calculate boundaries for the current scrolling session
+      const minScroll = Math.max(0, (currentIndex - 1) * pageHeight);
+      const maxScroll = Math.min(totalScrollableHeight, (currentIndex + 1) * pageHeight);
+
+      // Apply friction and compute next position
+      let nextScroll = el.scrollTop + e.deltaY * 0.2;
+
+      // Hard clamp prevents skipping past the next page
+      el.scrollTop = Math.max(minScroll, Math.min(nextScroll, maxScroll));
     };
 
     const handleScroll = () => {
+      if (isSnapping.current) return;
+
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      gsap.killTweensOf(el);
 
       timeoutRef.current = setTimeout(() => {
         const pageCount = PORTFOLIO_PAGE_VIEWS.length;
@@ -62,8 +90,8 @@ function ScrollSnapper() {
         const exactPageIndex = currentOffset * (pageCount - 1);
         let nearestPageIndex = Math.round(exactPageIndex);
 
-        // 1.5 Directional bias: If the user scrolls at least 10% towards the next page, 
-        // assume they want to go there and snap forward/backward, instead of pushing them back.
+        // Directional bias: If the user scrolls at least 10% towards the next page, 
+        // assume they want to go there and snap.
         const diffFromLastSnap = exactPageIndex - lastSnapIndex.current;
         if (diffFromLastSnap > 0.1 && nearestPageIndex === lastSnapIndex.current) {
           nearestPageIndex = lastSnapIndex.current + 1;
@@ -71,23 +99,22 @@ function ScrollSnapper() {
           nearestPageIndex = lastSnapIndex.current - 1;
         }
 
-        // Keep it within bounds
         nearestPageIndex = Math.max(0, Math.min(nearestPageIndex, pageCount - 1));
 
-        // 2. We removed the single-page guard so the user can scroll to the end of the page freely.
         const targetOffset = nearestPageIndex / (pageCount - 1);
         const targetScroll = targetOffset * totalScrollableHeight;
 
-        // 3. Proximity Check: Only snap if we are within 100px of the target
         const distance = Math.abs(el.scrollTop - targetScroll);
 
         if (distance > 0) {
+          isSnapping.current = true;
           gsap.to(el, {
             scrollTop: targetScroll,
-            duration: 0.25,
+            duration: .9, // Slower, smoother snap effect
             ease: 'power2.out',
             onComplete: () => {
               lastSnapIndex.current = nearestPageIndex;
+              isSnapping.current = false;
             },
             overwrite: true
           });
@@ -177,32 +204,32 @@ function Scene() {
   return (
     <>
       <group ref={groupRef}>
-      <Environment preset="city" />
+        <Environment preset="city" />
 
-      <ambientLight intensity={0.3} />
-      <directionalLight position={[10, 10, 5]} intensity={1.5} color="#ffffff" />
-      <directionalLight position={[-10, -10, -5]} intensity={1} color="#aaaaff" />
-      <pointLight position={[-9, 2, -10]} intensity={8} color="#d900ff" distance={25} decay={2} />
-      <pointLight position={[-6, -4, -8]} intensity={5} color="#fb00c9" distance={20} decay={2} />
+        <ambientLight intensity={0.3} />
+        <directionalLight position={[10, 10, 5]} intensity={1.5} color="#ffffff" />
+        <directionalLight position={[-10, -10, -5]} intensity={1} color="#aaaaff" />
+        <pointLight position={[-9, 2, -10]} intensity={8} color="#d900ff" distance={25} decay={2} />
+        <pointLight position={[-6, -4, -8]} intensity={5} color="#fb00c9" distance={20} decay={2} />
 
-      <group ref={stationGroupRef}>
-        {/* The Tilted Axis: matches the rotation needed for the station's ring */}
-        <group rotation={[1.9, 2.35, -.55]}>
-          {/* The Spin: rotates both objects around the tilted X-axis */}
-          <group ref={sharedRotationRef}>
-            <SpaceStation
-              scale={1}
-              position={[0, 0, 0]}
-              // Local rotation calculated to maintain the original look [0.2, 0, 0.5] inside the tilt
-              rotation={[-1.4698, -0.4558, -1.8012]}
-            />
-            <ProjectsGallery />
-            <ContactOrbit />
+        <group ref={stationGroupRef}>
+          {/* The Tilted Axis: matches the rotation needed for the station's ring */}
+          <group rotation={[1.9, 2.35, -.55]}>
+            {/* The Spin: rotates both objects around the tilted X-axis */}
+            <group ref={sharedRotationRef}>
+              <SpaceStation
+                scale={1}
+                position={[0, 0, 0]}
+                // Local rotation calculated to maintain the original look [0.2, 0, 0.5] inside the tilt
+                rotation={[-1.4698, -0.4558, -1.8012]}
+              />
+              <ProjectsGallery />
+              <ContactOrbit />
+            </group>
+            <WhoAmIGallery />
           </group>
-          <WhoAmIGallery />
         </group>
-      </group>
-      <ArsenalGallery />
+        <ArsenalGallery />
       </group>
     </>
   );
