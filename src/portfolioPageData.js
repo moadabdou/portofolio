@@ -168,28 +168,28 @@ export const WHO_AM_I_INFO = {
   "WHO I AM": {
     image: "/who_am_i/1.png",
     profileTitle: "PROFILE INSIGHT:",
-    details: "I am a creative developer specializing in the intersection of immersive 3D experiences and scalable backend architectures. With a focus on performance and visual fidelity, I build digital environments that push the boundaries of the modern web.",
+    details: "I am Moad Elabdellaoui, a software engineering student based in Morocco specializing in backend development, systems programming, and DevOps. My technical approach prioritizes deep foundational knowledge of complex systems over superficial framework application.",
     messageTitle: "MESSAGE STREAM:",
     message: "> INITIALIZING USER INTERACTION PROTOCOL. DATA LOG ACQUIRED. EXPLORE TO ACCESS CORE MEMORIES.<"
   },
   "WHAT I BUILD": {
     image: "/who_am_i/2.png",
     profileTitle: "SYSTEM ARCHITECTURE:",
-    details: "Focusing on React, Three.js, and custom GLSL shaders, I craft interactive worlds that feel alive. My work blends cinematic aesthetics with high-performance engineering to create unique user journeys that resonate with modern digital culture.",
+    details: "I engineer scalable backend infrastructure, custom networking protocols like ArimaSSH, and distributed systems such as FernOS. Additionally, my technical scope extends to researching machine learning architectures and performing advanced Linux system optimization.",
     messageTitle: "CONSTRUCTION LOG:",
     message: "> BUILDING IMMERSIVE DIGITAL WORLDS. FOCUSING ON PERFORMANCE AND VISUAL FIDELITY. SYSTEM STABLE.<"
   },
   "HOW I THINK": {
     image: "/who_am_i/3.png",
     profileTitle: "LOGIC CORE:",
-    details: "A problem-solver at heart, I approach code as an art form. I prioritize clean, modular architecture and intuitive user experiences, ensuring every project I create is as robust as it is beautiful, focusing on long-term maintainability.",
+    details: "My engineering philosophy centers on architectural integrity and system internals. Whether analyzing Java ClassLoaders, implementing concurrent processing with Virtual Threads, or designing cryptographic solutions, I operate with strict analytical rigor.",
     messageTitle: "COGNITIVE THREAD:",
     message: "> CODE IS ART. ARCHITECTING ELEGANT SOLUTIONS TO COMPLEX VISUAL CHALLENGES. PROCESSING...<"
   },
   "WHAT'S NEXT": {
     image: "/who_am_i/4.png",
     profileTitle: "FUTURE OBJECTIVES:",
-    details: "Constantly exploring the frontier of WebGPU and generative AI, I am dedicated to bringing desktop-grade graphics to the browser. My goal is clear: pushing real-time interactivity to its absolute limit through hardware-accelerated innovation.",
+    details: "I am actively pursuing my Java SE 21 and OCI DevOps Professional certifications. Concurrently, I am seeking a rigorous software engineering internship in Morocco for summer 2026, specifically targeting enterprise-grade projects with complex architectural requirements.",
     messageTitle: "UPCOMING STREAM:",
     message: "> PUSHING THE BOUNDARIES OF WHAT'S POSSIBLE IN THE BROWSER. THE FUTURE IS REAL-TIME 3D.<"
   }

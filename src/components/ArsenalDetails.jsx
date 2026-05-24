@@ -8,37 +8,38 @@ import './ArsenalDetails.css';
 
 const ARSENAL_DATA = [
   { 
-    name: 'FOUNDATION', 
-    items: ['REACT', 'THREE.JS', 'NODE.JS', 'TYPESCRIPT', 'GLSL'],
+    name: 'LANGUAGES', 
+    items: ['PYTHON', 'C++', 'JAVA', 'TYPESCRIPT', 'PHP'],
     descriptions: [
-      'The core of modern web architecture, enabling dynamic and component-driven interfaces.',
-      'A powerful 3D library that brings high-performance WebGL graphics to the browser.',
-      'Scalable server-side runtime for building high-concurrency network applications.',
-      'A robust superset of JavaScript providing static typing for mission-critical code.',
-      'Low-level shader language for crafting high-fidelity visual effects and mathematics.'
+      'Advanced scripting, scripting-based systems automation, data manipulation pipelines, and machine learning model training.',
+      'Low-level system programming, custom memory management, hardware-accelerated vectorization, and high-performance engines.',
+      'Enterprise-grade backends, multithreaded concurrency models leveraging Virtual Threads, robust memory models, and modular architectures.',
+      'Strict compile-time type safety for complex frontend application logic, solid patterns, and clean structural typing.',
+      'Server-side web applications, robust templating, and rapid backend API prototyping with high interoperability.'
     ]
   },
   { 
-    name: 'STATION TOOLS', 
-    items: ['GIT', 'DOCKER', 'VITE', 'GSAP', 'FIGMA', 'POSTGRES'],
+    name: 'FRAMEWORKS & LIBS', 
+    items: ['REACT', 'SPRING BOOT', 'PYTORCH', 'NUMPY', 'PANDAS'],
     descriptions: [
-      'Distributed version control for seamless multi-developer synchronization.',
-      'Containerization technology for consistent deployment across any environment.',
-      'Next-generation frontend tooling with lightning-fast HMR and build times.',
-      'The industry standard for high-performance timeline-based web animations.',
-      'Professional interface design tool for crafting high-fidelity prototypes.',
-      'Advanced open-source relational database for robust data persistence.'
+      'Component-driven single-page interfaces, state synchronization across highly interactive, real-time reactive displays.',
+      'Enterprise Java backend structures, secure APIs, dependency injection, and integrated transactional operations.',
+      'Custom neural network training, dynamic computational graphs, GPU-accelerated tensor operations, and architectural experimentation.',
+      'High-performance multi-dimensional array operations, scientific computing, mathematical vectorization, and linear algebra.',
+      'Large-scale tabular data manipulation, statistical analysis, data cleaning pipelines, and structured dataframe operations.'
     ]
   },
   { 
-    name: 'PROTOCOLS', 
-    items: ['GRAPHQL', 'CI/CD', 'REST', 'UI/UX', '3D MATH'],
+    name: 'DATABASES & DEVOPS', 
+    items: ['MONGODB', 'MYSQL', 'POSTGRES', 'ORACLE DB', 'DOCKER', 'GIT', 'CI/CD'],
     descriptions: [
-      'Declarative data fetching for complex API structures and optimized payloads.',
-      'Automated pipelines for continuous integration and stable delivery workflows.',
-      'Standard architectural style for interoperable and scalable web services.',
-      'Holistic approach to crafting intuitive and aesthetically premium user journeys.',
-      'The mathematical foundation of 3D space, physics, and procedural generation.'
+      'Document-oriented NoSQL database for rapid unstructured data models and flexible JSON-like document routing.',
+      'Relational database operations, complex transactional queries, robust relational database schemas, and structured storage.',
+      'Advanced object-relational database offering acid-compliance, custom indexing strategies, and robust data persistence.',
+      'Enterprise-grade relational database optimized for massive concurrent operations, secure scaling, and high availability.',
+      'Consistent containerization pipelines for clean software packaging, isolated stateful service environments, and reproducibility.',
+      'Distributed version control system for atomic commits, branching workflows, and conflict-free collaboration patterns.',
+      'Automated pipelines ensuring constant integration, automated linting, test suite execution, and robust production deployments.'
     ]
   }
 ];
