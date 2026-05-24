@@ -15,8 +15,13 @@ export function ContactOrbit() {
   const originalText = "GET IN TOUCH";
   const [displayText, setDisplayText] = useState(originalText);
   const [isGlitching, setIsGlitching] = useState(false);
-  const [opacity, setOpacity] = useState(0);
+  const opacityRef = useRef(0);
   const glitchTimer = useRef(0);
+  
+  // We need refs to update the text opacities without triggering re-renders
+  const charRefs = useRef([]);
+  const redCharRefs = useRef([]);
+  const cyanCharRefs = useRef([]);
 
   useFrame((state, delta) => {
     // Rotation spin has been completely removed to keep the text static and readable
@@ -24,10 +29,20 @@ export function ContactOrbit() {
     const offset = scroll.offset;
     // Fade in during the scroll transition from arsenal (0.75) to contact (1.0)
     const nextOpacity = clamp((offset - 0.75) / 0.25, 0, 1);
+    opacityRef.current = nextOpacity;
 
-    if (Math.abs(nextOpacity - opacity) > 0.001) {
-      setOpacity(nextOpacity);
-    }
+    // Update opacity directly on the text meshes
+    charRefs.current.forEach((ref) => {
+      if (ref) ref.fillOpacity = nextOpacity;
+    });
+    
+    redCharRefs.current.forEach((ref) => {
+      if (ref) ref.fillOpacity = nextOpacity * 0.55;
+    });
+
+    cyanCharRefs.current.forEach((ref) => {
+      if (ref) ref.fillOpacity = nextOpacity * 0.55;
+    });
 
     // Cyberpunk Text Glitch Loop
     glitchTimer.current += delta;
@@ -35,7 +50,7 @@ export function ContactOrbit() {
       glitchTimer.current = 0;
 
       const shouldGlitch = Math.random() > 0.8;
-      if (shouldGlitch && nextOpacity > 0.05) {
+      if (shouldGlitch && opacityRef.current > 0.05) {
         setIsGlitching(true);
 
         // Character Corruption
@@ -78,6 +93,7 @@ export function ContactOrbit() {
 
         return (
           <Text
+            ref={(el) => charRefs.current[i] = el}
             key={`char-${i}`}
             position={[xOffset, y, z]}
             // Orthogonal to the orbit plane, wrapping like the project cards
@@ -85,7 +101,7 @@ export function ContactOrbit() {
             fontSize={0.30}
             font="/static/Orbitron-ExtraBold.ttf"
             color="white"
-            fillOpacity={opacity}
+            fillOpacity={opacityRef.current}
             textAlign="center"
             anchorX="center"
             anchorY="middle"
@@ -96,7 +112,7 @@ export function ContactOrbit() {
       })}
 
       {/* Chromatic Aberration Glitch Overlay */}
-      {isGlitching && opacity > 0.05 && (
+      {isGlitching && opacityRef.current > 0.05 && (
         <>
           {/* Red Glitch Ring */}
           {characters.map((char, i) => {
@@ -111,13 +127,14 @@ export function ContactOrbit() {
 
             return (
               <Text
+                ref={(el) => redCharRefs.current[i] = el}
                 key={`red-char-${i}`}
                 position={[xOffset - 0.012, y, z]}
                 rotation={[-angle, 0, -Math.PI / 2]}
                 fontSize={0.30}
                 font="/static/Orbitron-ExtraBold.ttf"
                 color="#ff003c"
-                fillOpacity={opacity * 0.55}
+                fillOpacity={opacityRef.current * 0.55}
                 textAlign="center"
                 anchorX="center"
                 anchorY="middle"
@@ -139,13 +156,14 @@ export function ContactOrbit() {
 
             return (
               <Text
+                ref={(el) => cyanCharRefs.current[i] = el}
                 key={`cyan-char-${i}`}
                 position={[xOffset + 0.012, y, z]}
                 rotation={[-angle, 0, -Math.PI / 2]}
                 fontSize={0.30}
                 font="/static/Orbitron-ExtraBold.ttf"
                 color="#00ffff"
-                fillOpacity={opacity * 0.55}
+                fillOpacity={opacityRef.current * 0.55}
                 textAlign="center"
                 anchorX="center"
                 anchorY="middle"

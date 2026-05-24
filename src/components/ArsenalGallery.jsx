@@ -334,7 +334,6 @@ function TechIcon({ icon: Icon, position, opacity, isFocused, size = 0.4, glitch
       <Icon color={color} size={64} strokeWidth={1.5} />
     );
 
-    // Ensure the SVG element contains the XML namespace so browsers can render it inside an Image
     if (!svgString.includes('xmlns="http://www.w3.org/2000/svg"')) {
       svgString = svgString.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
     }
@@ -344,8 +343,6 @@ function TechIcon({ icon: Icon, position, opacity, isFocused, size = 0.4, glitch
     canvas.height = 256;
     const ctx = canvas.getContext('2d');
     const img = new Image();
-
-    // Use encodeURIComponent which is robust and safe from base64/btoa ASCII errors
     img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svgString)}`;
 
     const tex = new THREE.CanvasTexture(canvas);
@@ -356,6 +353,12 @@ function TechIcon({ icon: Icon, position, opacity, isFocused, size = 0.4, glitch
     };
     return tex;
   }, [Icon, isFocused]);
+
+  useEffect(() => {
+    return () => {
+      if (texture) texture.dispose();
+    };
+  }, [texture]);
 
   const finalSize = isFocused ? size * 1.25 : size;
   const meshRef = useRef();

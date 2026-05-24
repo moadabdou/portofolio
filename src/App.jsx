@@ -225,6 +225,7 @@ export default function App() {
       <Canvas
         camera={{ position: [0, 0, 10], fov: 50 }}
         gl={{ powerPreference: "high-performance", antialias: true }}
+        dpr={[1, 1.5]}
       >
         <color attach="background" args={['#0a0b10']} />
 
@@ -244,7 +245,7 @@ export default function App() {
             </Scroll>
           </ScrollControls>
 
-          <EffectComposer disableNormalPass>
+          <EffectComposer disableNormalPass multisampling={0}>
             <Bloom luminanceThreshold={0.9} luminanceSmoothing={0.9} height={300} intensity={1.0} mipmapBlur />
             <ChromaticAberration
               blendFunction={BlendFunction.NORMAL}

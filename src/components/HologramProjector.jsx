@@ -16,7 +16,7 @@ const OPTIONS = [
   "WHAT'S NEXT"
 ];
 
-function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionGlitch = 0 }) {
+function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionGlitchRef }) {
   const beamRef = useRef();
   const coreRef = useRef();
   const lightningRef = useRef();
@@ -38,6 +38,11 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
   });
 
   const currentProfileTex = data ? profileTextures[OPTIONS[selectedIndex]] : null;
+
+  React.useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
@@ -62,24 +67,22 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
     if (contentRef.current) {
       contentRef.current.position.y = Math.sin(t * 2) * 0.05;
 
+      const curGlitch = transitionGlitchRef ? transitionGlitchRef.current : 0;
       // Enhanced jitter during transition
-      const jitterThreshold = 0.98 - transitionGlitch * 0.2;
+      const jitterThreshold = 0.98 - curGlitch * 0.2;
       if (Math.random() > jitterThreshold) {
-        contentRef.current.position.x = (Math.random() - 0.5) * (0.05 + transitionGlitch * 0.5);
-        contentRef.current.position.z = (Math.random() - 0.5) * (transitionGlitch * 0.2);
+        contentRef.current.position.x = (Math.random() - 0.5) * (0.05 + curGlitch * 0.5);
+        contentRef.current.position.z = (Math.random() - 0.5) * (curGlitch * 0.2);
       } else {
         contentRef.current.position.x = 0;
         contentRef.current.position.z = 0;
       }
     }
 
-    if (state.clock.elapsedTime % 1 < 0.05) { // Update roughly every second for efficiency
-      setCurrentTime(new Date());
-    }
-
     if (panelMatRef.current) {
+      const curGlitch = transitionGlitchRef ? transitionGlitchRef.current : 0;
       panelMatRef.current.uTime = t;
-      panelMatRef.current.uGlitchIntensity = 0.05 + transitionGlitch * 0.8 + (Math.random() > 0.95 ? 0.2 : 0);
+      panelMatRef.current.uGlitchIntensity = 0.05 + curGlitch * 0.8 + (Math.random() > 0.95 ? 0.2 : 0);
       panelMatRef.current.uOpacity = 0.8 * opacity;
     }
   });
@@ -260,7 +263,7 @@ function ProjectedInfo({ selectedIndex, opacity, position, rotation, transitionG
   );
 }
 
-export function HologramProjector({ selectedIndex, transitionGlitch }) {
+export function HologramProjector({ selectedIndex, transitionGlitchRef }) {
   const groupRef = useRef();
   const robotRef = useRef();
   const [currentPosition, setCurrentPosition] = React.useState([0, 0, 0]);
@@ -391,7 +394,7 @@ export function HologramProjector({ selectedIndex, transitionGlitch }) {
         opacity={projectionOpacity}
         position={currentPosition}
         rotation={[3.5, 0, 0]} // Matching the robot's tilt
-        transitionGlitch={transitionGlitch}
+        transitionGlitchRef={transitionGlitchRef}
       />
     </>
   );

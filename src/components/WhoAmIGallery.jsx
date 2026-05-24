@@ -17,7 +17,7 @@ const OPTIONS = [
   "WHAT'S NEXT"
 ];
 
-function OptionButton({ text, index, total, radius, xOffset, opacity, isSelected, onSelect, glitchIntensity }) {
+function OptionButton({ text, index, total, radiusRef, xOffset, opacityRef, isSelected, onSelect, glitchIntensityRef }) {
   const groupRef = useRef();
   const textRef = useRef();
   const hudMeshRef = useRef();
@@ -30,9 +30,6 @@ function OptionButton({ text, index, total, radius, xOffset, opacity, isSelected
   const spread = Math.PI * 0.25;
   const BASE_ANGLE = -Math.PI / 6; // Aligns with the -2.1 offset visually
   const angle = ((index - (total - 1) / 2) / (total > 1 ? total - 1 : 1)) * spread + BASE_ANGLE;
-
-  const y = Math.sin(angle) * radius;
-  const z = Math.cos(angle) * radius;
   const x = xOffset;
 
   const geometry = useMemo(() => {
@@ -68,6 +65,13 @@ function OptionButton({ text, index, total, radius, xOffset, opacity, isSelected
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
+    const curOpacity = opacityRef ? opacityRef.current : 1;
+    const curRadius = radiusRef ? radiusRef.current : 3.6;
+    const curGlitch = glitchIntensityRef ? glitchIntensityRef.current : 0;
+
+    const y = Math.sin(angle) * curRadius;
+    const z = Math.cos(angle) * curRadius;
+
     // Scale pulse: normal pulse + active expansion (made faster and smaller)
     const basePulse = 1.0 + (isSelected ? Math.sin(state.clock.elapsedTime * 5) * 0.05 : 0);
     const activeScale = THREE.MathUtils.lerp(groupRef.current.scale.x, isSelected ? 1.08 : basePulse, delta * 10);
@@ -75,28 +79,29 @@ function OptionButton({ text, index, total, radius, xOffset, opacity, isSelected
 
     // Shift slightly forward when selected
     const targetZ = isSelected ? 0.1 : 0;
+    groupRef.current.position.y = y;
     groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, z + targetZ, delta * 18);
 
     if (bgRef.current && bgRef.current.material) {
-      bgRef.current.material.opacity = (isSelected ? 0.6 : 0.2) * opacity;
+      bgRef.current.material.opacity = (isSelected ? 0.6 : 0.2) * curOpacity;
       bgRef.current.material.color.lerp(new THREE.Color(isSelected ? "#ff00ff" : "#4b0082"), delta * 18);
     }
 
     if (hudMeshRef.current && hudMeshRef.current.material) {
       hudMeshRef.current.material.uTime = state.clock.elapsedTime;
       // Local glitch intensity increases when selected
-      const localGlitch = isSelected ? 0.4 + Math.random() * 0.2 : glitchIntensity;
+      const localGlitch = isSelected ? 0.4 + Math.random() * 0.2 : curGlitch;
       hudMeshRef.current.material.uGlitchIntensity = localGlitch;
 
       const hudPulse = (isSelected ? 1.0 : 0.8) + Math.sin(state.clock.elapsedTime * (isSelected ? 10 : 2) + index) * 0.2;
-      hudMeshRef.current.material.uOpacity = hudPulse * opacity;
+      hudMeshRef.current.material.uOpacity = hudPulse * curOpacity;
     }
 
     if (textRef.current) {
-      textRef.current.fillOpacity = opacity;
+      textRef.current.fillOpacity = curOpacity;
       // Flickering text when selected
       if (isSelected && Math.random() > 0.95) {
-        textRef.current.fillOpacity = 0.3 * opacity;
+        textRef.current.fillOpacity = 0.3 * curOpacity;
       }
     }
   });
@@ -104,7 +109,7 @@ function OptionButton({ text, index, total, radius, xOffset, opacity, isSelected
   return (
     <group
       ref={groupRef}
-      position={[x, y, z]}
+      position={[x, 0, 0]}
       rotation={[-angle, 0, -Math.PI]}
     >
       {/* Invisible Hit Area (Optimized size to avoid overlapping gaps) */}
@@ -175,11 +180,11 @@ export function WhoAmIGallery() {
 
   const radius = 3.6;
   const xOffset = 0.2;
-  const [opacity, setOpacity] = useState(1);
-  const [currentRadius, setCurrentRadius] = useState(radius);
-  const [glitchIntensity, setGlitchIntensity] = useState(0);
+  const opacityRef = useRef(1);
+  const currentRadiusRef = useRef(radius);
+  const glitchIntensityRef = useRef(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [transitionGlitch, setTransitionGlitch] = useState(0);
+  const transitionGlitchRef = useRef(0);
   const clickAudioCtxRef = useRef(null);
   const clickAudioBufferRef = useRef(null);
 
@@ -252,8 +257,8 @@ export function WhoAmIGallery() {
     const easedExit = Math.pow(exitProgress, 2.5);
     const nextRadius = radius - easedExit * radius;
 
-    setOpacity(nextOpacity);
-    setCurrentRadius(nextRadius);
+    opacityRef.current = nextOpacity;
+    currentRadiusRef.current = nextRadius;
 
     if (galleryRef.current.scale) {
       galleryRef.current.scale.setScalar(visibleScale);
@@ -264,13 +269,13 @@ export function WhoAmIGallery() {
     const intensity = (entranceProgress > 0 && entranceProgress < 1)
       ? (0.8 + Math.random() * 0.2) * (1.0 - entranceProgress)
       : Math.pow(1.0 - entranceProgress, 2.0);
-    setGlitchIntensity(intensity);
+    glitchIntensityRef.current = intensity;
 
     // Transition glitch decay
-    if (transitionGlitch > 0.01) {
-      setTransitionGlitch(THREE.MathUtils.lerp(transitionGlitch, 0, delta * 10));
-    } else if (transitionGlitch !== 0) {
-      setTransitionGlitch(0);
+    if (transitionGlitchRef.current > 0.01) {
+      transitionGlitchRef.current = THREE.MathUtils.lerp(transitionGlitchRef.current, 0, delta * 10);
+    } else if (transitionGlitchRef.current !== 0) {
+      transitionGlitchRef.current = 0;
     }
   });
 
@@ -282,21 +287,21 @@ export function WhoAmIGallery() {
           text={option}
           index={i}
           total={OPTIONS.length}
-          radius={currentRadius}
+          radiusRef={currentRadiusRef}
           xOffset={xOffset}
-          opacity={opacity}
+          opacityRef={opacityRef}
           isSelected={selectedIndex === i}
           onSelect={() => {
             if (selectedIndex !== i) {
               setSelectedIndex(i);
-              setTransitionGlitch(1.0);
+              transitionGlitchRef.current = 1.0;
               playClickSound();
             }
           }}
-          glitchIntensity={glitchIntensity}
+          glitchIntensityRef={glitchIntensityRef}
         />
       ))}
-      <HologramProjector selectedIndex={selectedIndex} transitionGlitch={transitionGlitch} />
+      <HologramProjector selectedIndex={selectedIndex} transitionGlitchRef={transitionGlitchRef} />
     </group>
   );
 }
