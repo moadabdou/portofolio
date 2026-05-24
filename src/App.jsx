@@ -79,7 +79,7 @@ function ScrollSnapper() {
         if (distance > 0 && distance < 500) {
           gsap.to(el, {
             scrollTop: targetScroll,
-            duration: 0.5,
+            duration: 0.25,
             ease: 'power2.out',
             onComplete: () => {
               lastSnapIndex.current = nearestPageIndex;
@@ -89,7 +89,7 @@ function ScrollSnapper() {
         } else {
           lastSnapIndex.current = nearestPageIndex;
         }
-      }, 60);
+      }, 40);
     };
 
     el.addEventListener('wheel', handleWheel, { passive: false });
